@@ -1,0 +1,1558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MATTER — From Quarks to Cosmos</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Rajdhani:wght@300;400;500;600&display=swap');
+
+:root {
+  --void: #04070f;
+  --deep: #080e1a;
+  --surface: #0d1525;
+  --surface2: #121d30;
+  --border: rgba(100,180,255,0.12);
+  --border2: rgba(100,180,255,0.25);
+  --quark: #ff6b35;
+  --proton: #ff3d71;
+  --neutron: #4a9eff;
+  --electron: #00d4ff;
+  --nucleus: #c77dff;
+  --atom: #7fff6b;
+  --molecule: #ffe135;
+  --compound: #ff9f1c;
+  --material: #2ec4b6;
+  --life: #ff006e;
+  --cosmos: #ffffff;
+  --glow: rgba(0,212,255,0.15);
+  --text: #c8dff0;
+  --text2: #5a7a9a;
+  --text3: #8ab4cc;
+  --accent: #00d4ff;
+  --font-display: 'Orbitron', monospace;
+  --font-body: 'Rajdhani', sans-serif;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  width: 100%; height: 100%;
+  background: var(--void);
+  color: var(--text);
+  font-family: var(--font-body);
+  overflow: hidden;
+}
+
+/* === CANVAS BACKGROUND === */
+#bg-canvas {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* === LAYOUT === */
+#app {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: 300px 1fr 320px;
+  grid-template-rows: 56px 1fr;
+  height: 100vh;
+  width: 100vw;
+  gap: 0;
+}
+
+/* === HEADER === */
+#header {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  border-bottom: 1px solid var(--border);
+  background: rgba(4,7,15,0.9);
+  backdrop-filter: blur(10px);
+  gap: 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+#header::before {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  opacity: 0.6;
+}
+
+#logo {
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 900;
+  letter-spacing: 0.3em;
+  color: var(--accent);
+  text-shadow: 0 0 20px rgba(0,212,255,0.6);
+}
+
+#era-display {
+  font-family: var(--font-display);
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  color: var(--text2);
+  text-transform: uppercase;
+}
+
+#era-name {
+  font-family: var(--font-display);
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  color: var(--accent);
+  text-shadow: 0 0 10px rgba(0,212,255,0.4);
+}
+
+#header-right {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.header-stat {
+  text-align: right;
+}
+.header-stat .hs-label {
+  font-size: 9px;
+  letter-spacing: 0.15em;
+  color: var(--text2);
+  text-transform: uppercase;
+  display: block;
+}
+.header-stat .hs-val {
+  font-family: var(--font-display);
+  font-size: 13px;
+  color: var(--accent);
+}
+
+/* === LEFT PANEL: RESOURCES === */
+#left-panel {
+  border-right: 1px solid var(--border);
+  background: rgba(8,14,26,0.95);
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 16px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+#left-panel::-webkit-scrollbar { width: 3px; }
+#left-panel::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+.panel-label {
+  font-family: var(--font-display);
+  font-size: 8px;
+  letter-spacing: 0.25em;
+  color: var(--text2);
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 6px;
+  margin-bottom: 4px;
+}
+
+/* Resource rows */
+.res-group { margin-bottom: 6px; }
+
+.res-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 5px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.03);
+  transition: opacity 0.3s;
+}
+
+.res-row.locked { opacity: 0.2; filter: blur(0.5px); }
+
+.res-info { display: flex; align-items: center; gap: 8px; }
+
+.res-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  box-shadow: 0 0 6px currentColor;
+  flex-shrink: 0;
+}
+
+.res-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text3);
+  letter-spacing: 0.03em;
+}
+
+.res-vals { text-align: right; }
+
+.res-count {
+  font-family: var(--font-display);
+  font-size: 12px;
+  display: block;
+  color: var(--text);
+}
+
+.res-rate {
+  font-size: 10px;
+  color: var(--text2);
+  font-family: var(--font-display);
+}
+
+/* === CENTER PANEL === */
+#center-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 20px;
+  gap: 16px;
+  overflow-y: auto;
+  background: rgba(6,10,18,0.8);
+  position: relative;
+}
+
+#center-panel::-webkit-scrollbar { width: 3px; }
+#center-panel::-webkit-scrollbar-thumb { background: var(--border2); }
+
+/* Main click area */
+#click-zone {
+  position: relative;
+  width: 220px;
+  height: 220px;
+  flex-shrink: 0;
+  cursor: pointer;
+  user-select: none;
+}
+
+#click-core {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: transform 0.1s;
+}
+
+#click-core:active { transform: scale(0.94); }
+
+#core-svg {
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 0 20px var(--accent));
+  transition: filter 0.5s;
+}
+
+.orbit-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 1px solid rgba(0,212,255,0.1);
+  animation: orbitSpin linear infinite;
+  pointer-events: none;
+}
+
+.orbit-particle {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  top: -3px;
+  left: 50%;
+  margin-left: -3px;
+  box-shadow: 0 0 8px currentColor;
+}
+
+@keyframes orbitSpin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+#click-label {
+  position: absolute;
+  bottom: -30px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: var(--font-display);
+  font-size: 9px;
+  letter-spacing: 0.3em;
+  color: var(--text2);
+  white-space: nowrap;
+  text-align: center;
+}
+
+#click-reward {
+  position: absolute;
+  bottom: -50px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: var(--font-display);
+  font-size: 11px;
+  color: var(--accent);
+  white-space: nowrap;
+}
+
+/* Era progress bar */
+#era-bar-wrap {
+  width: 100%;
+  max-width: 500px;
+}
+
+.era-bar-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 6px;
+}
+
+.era-title {
+  font-family: var(--font-display);
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  color: var(--accent);
+}
+
+.era-progress-text {
+  font-family: var(--font-display);
+  font-size: 10px;
+  color: var(--text2);
+}
+
+.era-track {
+  height: 6px;
+  background: var(--surface2);
+  border-radius: 3px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+
+.era-fill {
+  height: 100%;
+  border-radius: 3px;
+  background: linear-gradient(90deg, var(--accent), var(--nucleus));
+  transition: width 0.4s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.era-fill::after {
+  content: '';
+  position: absolute;
+  top: 0; right: 0; bottom: 0;
+  width: 20px;
+  background: rgba(255,255,255,0.3);
+  animation: shimmer 1s linear infinite;
+}
+
+@keyframes shimmer {
+  from { transform: translateX(20px); }
+  to { transform: translateX(-100px); }
+}
+
+/* Synthesis buttons */
+#synthesis-grid {
+  width: 100%;
+  max-width: 520px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.synth-btn {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 12px 14px;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.2s;
+  position: relative;
+  overflow: hidden;
+  font-family: var(--font-body);
+}
+
+.synth-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, transparent 0%, rgba(0,212,255,0.04) 100%);
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.synth-btn:hover:not(:disabled)::before { opacity: 1; }
+.synth-btn:hover:not(:disabled) {
+  border-color: var(--border2);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+}
+.synth-btn:active:not(:disabled) { transform: translateY(0) scale(0.98); }
+.synth-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+.synth-btn .sb-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  letter-spacing: 0.03em;
+  display: block;
+  margin-bottom: 3px;
+}
+
+.synth-btn .sb-recipe {
+  font-size: 11px;
+  color: var(--text2);
+  display: block;
+  margin-bottom: 6px;
+  line-height: 1.5;
+}
+
+.synth-btn .sb-yield {
+  font-family: var(--font-display);
+  font-size: 10px;
+  color: var(--accent);
+}
+
+/* Log / events */
+#log-panel {
+  width: 100%;
+  max-width: 520px;
+}
+
+#log-scroll {
+  height: 90px;
+  overflow-y: auto;
+  padding: 8px 10px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+}
+
+#log-scroll::-webkit-scrollbar { width: 3px; }
+#log-scroll::-webkit-scrollbar-thumb { background: var(--border2); }
+
+.log-line {
+  font-size: 11px;
+  color: var(--text2);
+  padding: 1px 0;
+  font-family: var(--font-display);
+  letter-spacing: 0.03em;
+}
+.log-line.milestone { color: var(--accent); }
+.log-line.warn { color: var(--quark); }
+
+/* === RIGHT PANEL: AUTOMATORS === */
+#right-panel {
+  border-left: 1px solid var(--border);
+  background: rgba(8,14,26,0.95);
+  overflow-y: auto;
+  padding: 16px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+#right-panel::-webkit-scrollbar { width: 3px; }
+#right-panel::-webkit-scrollbar-thumb { background: var(--border2); }
+
+.auto-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 10px 12px;
+  transition: all 0.2s;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+
+.auto-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(0,212,255,0.02), transparent);
+}
+
+.auto-card:hover:not(.locked-card) {
+  border-color: var(--border2);
+  box-shadow: 0 0 15px rgba(0,212,255,0.06);
+}
+
+.auto-card.locked-card {
+  opacity: 0.25;
+  cursor: not-allowed;
+  filter: blur(0.3px);
+}
+
+.auto-card.owned {
+  border-color: rgba(0,212,255,0.3);
+}
+
+.ac-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 4px;
+}
+
+.ac-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text3);
+  letter-spacing: 0.03em;
+}
+
+.ac-count {
+  font-family: var(--font-display);
+  font-size: 11px;
+  color: var(--accent);
+  background: rgba(0,212,255,0.1);
+  padding: 1px 6px;
+  border-radius: 10px;
+}
+
+.ac-desc {
+  font-size: 11px;
+  color: var(--text2);
+  margin-bottom: 6px;
+  line-height: 1.5;
+}
+
+.ac-cost {
+  font-family: var(--font-display);
+  font-size: 10px;
+  color: var(--text2);
+}
+
+.ac-rate {
+  font-size: 10px;
+  color: var(--atom);
+  margin-top: 2px;
+  font-family: var(--font-display);
+}
+
+/* === FLOATIES === */
+.floaty {
+  position: fixed;
+  font-family: var(--font-display);
+  font-size: 12px;
+  pointer-events: none;
+  z-index: 999;
+  animation: floatDrift 1.2s ease-out forwards;
+  text-shadow: 0 0 8px currentColor;
+  white-space: nowrap;
+}
+
+@keyframes floatDrift {
+  0%   { opacity: 1; transform: translateY(0) scale(1); }
+  100% { opacity: 0; transform: translateY(-70px) scale(0.7); }
+}
+
+/* === ERA TRANSITION OVERLAY === */
+#era-transition {
+  position: fixed;
+  inset: 0;
+  z-index: 500;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,0,0,0.9);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.5s;
+}
+
+#era-transition.active {
+  opacity: 1;
+  pointer-events: all;
+}
+
+#era-transition-text {
+  font-family: var(--font-display);
+  font-size: 36px;
+  font-weight: 900;
+  letter-spacing: 0.3em;
+  color: var(--accent);
+  text-shadow: 0 0 40px rgba(0,212,255,0.8);
+  text-align: center;
+  margin-bottom: 12px;
+}
+
+#era-transition-sub {
+  font-family: var(--font-display);
+  font-size: 12px;
+  letter-spacing: 0.2em;
+  color: var(--text2);
+  text-align: center;
+}
+
+/* === WIN SCREEN === */
+#win-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 600;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(ellipse at center, #0a1628 0%, #000 100%);
+}
+
+#win-screen.active { display: flex; }
+
+.win-title {
+  font-family: var(--font-display);
+  font-size: 48px;
+  font-weight: 900;
+  letter-spacing: 0.3em;
+  background: linear-gradient(135deg, var(--accent), var(--nucleus), var(--life));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.win-sub {
+  font-family: var(--font-display);
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  color: var(--text2);
+  text-align: center;
+  margin-bottom: 30px;
+  line-height: 2;
+}
+
+.win-btn {
+  background: transparent;
+  border: 1px solid var(--accent);
+  color: var(--accent);
+  font-family: var(--font-display);
+  font-size: 12px;
+  letter-spacing: 0.2em;
+  padding: 12px 32px;
+  cursor: pointer;
+  border-radius: 2px;
+  transition: all 0.2s;
+}
+
+.win-btn:hover {
+  background: rgba(0,212,255,0.1);
+  box-shadow: 0 0 20px rgba(0,212,255,0.3);
+}
+
+/* Tabs in center */
+#center-tabs {
+  display: flex;
+  gap: 4px;
+  width: 100%;
+  max-width: 520px;
+}
+
+.c-tab {
+  flex: 1;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text2);
+  font-family: var(--font-display);
+  font-size: 9px;
+  letter-spacing: 0.15em;
+  padding: 7px 4px;
+  cursor: pointer;
+  border-radius: 3px;
+  text-transform: uppercase;
+  transition: all 0.15s;
+  text-align: center;
+}
+
+.c-tab:hover { color: var(--text); }
+.c-tab.active {
+  background: rgba(0,212,255,0.1);
+  border-color: var(--border2);
+  color: var(--accent);
+}
+
+#tab-content { width: 100%; max-width: 520px; }
+
+.tab-pane { display: none; }
+.tab-pane.active { display: block; }
+
+/* upgrades */
+.upgrade-grid { display: flex; flex-direction: column; gap: 6px; }
+
+.upg-btn {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-family: var(--font-body);
+  padding: 10px 12px;
+  cursor: pointer;
+  border-radius: 4px;
+  text-align: left;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: all 0.15s;
+  width: 100%;
+}
+
+.upg-btn:hover:not(:disabled) { border-color: var(--border2); }
+.upg-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+.upg-btn.bought { border-color: rgba(127,255,107,0.3); color: var(--atom); opacity: 0.6; cursor: default; }
+
+.upg-info .upg-name { font-size: 13px; font-weight: 600; display: block; margin-bottom: 2px; }
+.upg-info .upg-desc { font-size: 11px; color: var(--text2); }
+.upg-cost { font-family: var(--font-display); font-size: 10px; color: var(--accent); white-space: nowrap; margin-left: 12px; }
+
+/* notification pulse */
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+.pulse { animation: pulse 1.5s infinite; }
+
+</style>
+</head>
+<body>
+
+<canvas id="bg-canvas"></canvas>
+
+<div id="app">
+  <!-- HEADER -->
+  <header id="header">
+    <div>
+      <div id="logo">MATTER</div>
+      <div id="era-display">CURRENT ERA</div>
+    </div>
+    <div style="width:1px;height:30px;background:var(--border)"></div>
+    <div>
+      <div style="font-size:9px;letter-spacing:0.15em;color:var(--text2);text-transform:uppercase;margin-bottom:2px">Era</div>
+      <div id="era-name" style="font-family:var(--font-display);font-size:12px;letter-spacing:0.15em;color:var(--accent)">The Quark Epoch</div>
+    </div>
+    <div id="header-right">
+      <div class="header-stat">
+        <span class="hs-label">Total Synth/s</span>
+        <span class="hs-val" id="h-rate">0.00</span>
+      </div>
+      <div class="header-stat">
+        <span class="hs-label">Prestige Level</span>
+        <span class="hs-val" id="h-prestige">—</span>
+      </div>
+      <div class="header-stat">
+        <span class="hs-label">Time Elapsed</span>
+        <span class="hs-val" id="h-time">00:00</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- LEFT: RESOURCES -->
+  <div id="left-panel">
+    <div class="panel-label">Resources</div>
+    <div id="res-list"></div>
+  </div>
+
+  <!-- CENTER -->
+  <div id="center-panel">
+    <!-- Click zone -->
+    <div id="click-zone" onclick="handleClick(event)">
+      <div id="click-core">
+        <svg id="core-svg" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+          <!-- outer glow ring -->
+          <circle cx="100" cy="100" r="90" fill="none" stroke="rgba(0,212,255,0.06)" stroke-width="1"/>
+          <circle cx="100" cy="100" r="75" fill="none" stroke="rgba(0,212,255,0.1)" stroke-width="1"/>
+          <!-- core -->
+          <circle id="core-circle" cx="100" cy="100" r="40" fill="rgba(0,212,255,0.08)" stroke="rgba(0,212,255,0.5)" stroke-width="1.5"/>
+          <circle id="core-inner" cx="100" cy="100" r="22" fill="rgba(0,212,255,0.15)"/>
+          <circle id="core-nucleus" cx="100" cy="100" r="8" fill="var(--accent)" opacity="0.9"/>
+          <!-- particles (animated via JS) -->
+          <g id="svg-particles"></g>
+        </svg>
+      </div>
+      <!-- orbit rings -->
+      <div class="orbit-ring" style="inset:20px;animation-duration:4s">
+        <div class="orbit-particle" style="color:var(--quark);background:var(--quark)"></div>
+      </div>
+      <div class="orbit-ring" style="inset:5px;animation-duration:7s;animation-direction:reverse">
+        <div class="orbit-particle" style="color:var(--electron);background:var(--electron)"></div>
+      </div>
+      <div id="click-label">CLICK TO SYNTHESIZE</div>
+      <div id="click-reward">+1 Quark per click</div>
+    </div>
+
+    <!-- Era progress -->
+    <div style="height:50px"></div>
+    <div id="era-bar-wrap">
+      <div class="era-bar-top">
+        <span class="era-title" id="era-title-bar">THE QUARK EPOCH</span>
+        <span class="era-progress-text" id="era-prog-text">0 / 1,000</span>
+      </div>
+      <div class="era-track">
+        <div class="era-fill" id="era-fill" style="width:0%"></div>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div id="center-tabs">
+      <button class="c-tab active" onclick="setTab('synth')">Synthesize</button>
+      <button class="c-tab" onclick="setTab('upgrades')">Upgrades</button>
+      <button class="c-tab" onclick="setTab('research')">Research</button>
+    </div>
+
+    <!-- Tab content -->
+    <div id="tab-content">
+      <div id="tab-synth" class="tab-pane active">
+        <div id="synthesis-grid"></div>
+      </div>
+      <div id="tab-upgrades" class="tab-pane">
+        <div class="upgrade-grid" id="upgrades-list"></div>
+      </div>
+      <div id="tab-research" class="tab-pane">
+        <div class="upgrade-grid" id="research-list"></div>
+      </div>
+    </div>
+
+    <!-- Log -->
+    <div id="log-panel">
+      <div class="panel-label" style="margin-bottom:6px">Event Log</div>
+      <div id="log-scroll"></div>
+    </div>
+  </div>
+
+  <!-- RIGHT: AUTOMATORS -->
+  <div id="right-panel">
+    <div class="panel-label">Automators</div>
+    <div id="automators-list"></div>
+  </div>
+</div>
+
+<!-- ERA TRANSITION OVERLAY -->
+<div id="era-transition">
+  <div id="era-transition-text"></div>
+  <div id="era-transition-sub"></div>
+</div>
+
+<!-- WIN SCREEN -->
+<div id="win-screen">
+  <div class="win-title">THE COSMOS AWAKENS</div>
+  <div class="win-sub" id="win-stats"></div>
+  <button class="win-btn" onclick="location.reload()">↺ BEGIN AGAIN</button>
+</div>
+
+<script>
+// ========================================
+// PARTICLE BACKGROUND
+// ========================================
+const canvas = document.getElementById('bg-canvas');
+const ctx = canvas.getContext('2d');
+let particles = [];
+
+function resizeCanvas() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+resizeCanvas();
+window.addEventListener('resize', resizeCanvas);
+
+function initParticles() {
+  particles = [];
+  for (let i = 0; i < 120; i++) {
+    particles.push({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height,
+      r: Math.random() * 1.5 + 0.3,
+      vx: (Math.random() - 0.5) * 0.3,
+      vy: (Math.random() - 0.5) * 0.3,
+      alpha: Math.random() * 0.5 + 0.1,
+      color: ['#00d4ff','#c77dff','#7fff6b','#ff6b35'][Math.floor(Math.random()*4)]
+    });
+  }
+}
+initParticles();
+
+function drawParticles() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  particles.forEach(p => {
+    p.x += p.vx; p.y += p.vy;
+    if (p.x < 0) p.x = canvas.width;
+    if (p.x > canvas.width) p.x = 0;
+    if (p.y < 0) p.y = canvas.height;
+    if (p.y > canvas.height) p.y = 0;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+    ctx.fillStyle = p.color;
+    ctx.globalAlpha = p.alpha;
+    ctx.fill();
+    ctx.globalAlpha = 1;
+  });
+
+  // draw faint connections
+  ctx.globalAlpha = 0.03;
+  ctx.strokeStyle = '#00d4ff';
+  ctx.lineWidth = 0.5;
+  for (let i = 0; i < particles.length; i++) {
+    for (let j = i + 1; j < particles.length; j++) {
+      const dx = particles[i].x - particles[j].x;
+      const dy = particles[i].y - particles[j].y;
+      const dist = Math.sqrt(dx*dx + dy*dy);
+      if (dist < 100) {
+        ctx.globalAlpha = 0.04 * (1 - dist/100);
+        ctx.beginPath();
+        ctx.moveTo(particles[i].x, particles[i].y);
+        ctx.lineTo(particles[j].x, particles[j].y);
+        ctx.stroke();
+      }
+    }
+  }
+  ctx.globalAlpha = 1;
+  requestAnimationFrame(drawParticles);
+}
+drawParticles();
+
+// ========================================
+// GAME DATA
+// ========================================
+
+const ERAS = [
+  { id: 'quark',     name: 'The Quark Epoch',          color: '#ff6b35', unlock: 0,        threshold: 1000,       clickResource: 'quark',    clickAmt: () => 1 * G.mult.click },
+  { id: 'hadron',    name: 'The Hadron Era',            color: '#ff3d71', unlock: 1000,     threshold: 8000,       clickResource: 'proton',   clickAmt: () => 1 * G.mult.click },
+  { id: 'lepton',    name: 'The Lepton Epoch',          color: '#4a9eff', unlock: 8000,     threshold: 40000,      clickResource: 'electron', clickAmt: () => 2 * G.mult.click },
+  { id: 'nucleon',   name: 'Nucleosynthesis',           color: '#c77dff', unlock: 40000,    threshold: 200000,     clickResource: 'nucleus',  clickAmt: () => 3 * G.mult.click },
+  { id: 'atom',      name: 'The Atomic Age',            color: '#7fff6b', unlock: 200000,   threshold: 1000000,    clickResource: 'hydrogen', clickAmt: () => 5 * G.mult.click },
+  { id: 'molecule',  name: 'Molecular Assembly',        color: '#ffe135', unlock: 1000000,  threshold: 6000000,    clickResource: 'h2o',      clickAmt: () => 8 * G.mult.click },
+  { id: 'compound',  name: 'Compound Chemistry',        color: '#ff9f1c', unlock: 6000000,  threshold: 30000000,   clickResource: 'organic',  clickAmt: () => 15 * G.mult.click },
+  { id: 'material',  name: 'Material Synthesis',        color: '#2ec4b6', unlock: 30000000, threshold: 150000000,  clickResource: 'crystal',  clickAmt: () => 25 * G.mult.click },
+  { id: 'cell',      name: 'The Prebiotic Soup',        color: '#ff006e', unlock: 150000000,threshold: 800000000,  clickResource: 'amino',    clickAmt: () => 50 * G.mult.click },
+  { id: 'life',      name: 'Life Emerges',              color: '#ffffff', unlock: 800000000,threshold: Infinity,   clickResource: 'dna',      clickAmt: () => 100 * G.mult.click },
+];
+
+const RESOURCES = [
+  // Quark era
+  { id: 'quark',    name: 'Quarks',          color: '#ff6b35', era: 0 },
+  // Hadron era
+  { id: 'proton',   name: 'Protons',         color: '#ff3d71', era: 1 },
+  { id: 'neutron',  name: 'Neutrons',        color: '#4a9eff', era: 1 },
+  // Lepton
+  { id: 'electron', name: 'Electrons',       color: '#00d4ff', era: 2 },
+  { id: 'photon',   name: 'Photons',         color: '#fffbe6', era: 2 },
+  // Nucleon
+  { id: 'nucleus',  name: 'Nuclei',          color: '#c77dff', era: 3 },
+  { id: 'deuterium',name: 'Deuterium',       color: '#9d60ff', era: 3 },
+  { id: 'helium4',  name: 'Helium-4 Nuclei', color: '#b088ff', era: 3 },
+  // Atom
+  { id: 'hydrogen', name: 'Hydrogen (H)',    color: '#7fff6b', era: 4 },
+  { id: 'helium',   name: 'Helium (He)',     color: '#9dff8a', era: 4 },
+  { id: 'lithium',  name: 'Lithium (Li)',    color: '#b5ffa6', era: 4 },
+  { id: 'carbon',   name: 'Carbon (C)',      color: '#c8ffc0', era: 4 },
+  { id: 'oxygen',   name: 'Oxygen (O)',      color: '#ddffda', era: 4 },
+  { id: 'nitrogen', name: 'Nitrogen (N)',    color: '#f0fff0', era: 4 },
+  // Molecule
+  { id: 'h2',       name: 'H₂ (Hydrogen Gas)',  color: '#ffe135', era: 5 },
+  { id: 'h2o',      name: 'H₂O (Water)',         color: '#80e8ff', era: 5 },
+  { id: 'co2',      name: 'CO₂',                color: '#ffca80', era: 5 },
+  { id: 'nh3',      name: 'NH₃ (Ammonia)',       color: '#d4ff80', era: 5 },
+  { id: 'ch4',      name: 'CH₄ (Methane)',       color: '#ffb380', era: 5 },
+  // Compound
+  { id: 'organic',  name: 'Organic Molecules',  color: '#ff9f1c', era: 6 },
+  { id: 'lipid',    name: 'Lipids',             color: '#ffb84d', era: 6 },
+  { id: 'sugar',    name: 'Sugars',             color: '#ffd180', era: 6 },
+  { id: 'phosphate',name: 'Phosphates',         color: '#ff8c00', era: 6 },
+  // Material
+  { id: 'crystal',  name: 'Mineral Crystals',   color: '#2ec4b6', era: 7 },
+  { id: 'silicate', name: 'Silicates',          color: '#4be0d8', era: 7 },
+  { id: 'iron',     name: 'Iron Oxide',         color: '#ff7b54', era: 7 },
+  { id: 'calcite',  name: 'Calcite',            color: '#9ffffc', era: 7 },
+  // Cell
+  { id: 'amino',    name: 'Amino Acids',        color: '#ff006e', era: 8 },
+  { id: 'nucleotide',name:'Nucleotides',        color: '#ff4da6', era: 8 },
+  { id: 'peptide',  name: 'Peptide Chains',     color: '#ff80c0', era: 8 },
+  { id: 'membrane', name: 'Lipid Membranes',    color: '#ffb3da', era: 8 },
+  // Life
+  { id: 'dna',      name: 'DNA Strands',        color: '#ffffff', era: 9 },
+  { id: 'rna',      name: 'RNA Molecules',      color: '#e0e0ff', era: 9 },
+  { id: 'protein',  name: 'Proteins',           color: '#c0c0ff', era: 9 },
+  { id: 'cell_unit',name: 'Protocells',         color: '#a0a0ff', era: 9 },
+];
+
+const SYNTH_RECIPES = [
+  // ERA 0 → 1: quarks → hadrons
+  { id: 'make_proton',   era: 0, name: 'Fuse Proton',    recipe: { quark: 3 }, yield: { proton: 1 },    yieldStr: '+1 Proton' },
+  { id: 'make_neutron',  era: 0, name: 'Fuse Neutron',   recipe: { quark: 3 }, yield: { neutron: 1 },   yieldStr: '+1 Neutron' },
+  // ERA 1: hadrons
+  { id: 'make_electron', era: 1, name: 'Emit Electron',  recipe: { photon: 2, quark: 1 }, yield: { electron: 1 }, yieldStr: '+1 Electron', photonFree: true },
+  { id: 'make_photon',   era: 1, name: 'Release Photon', recipe: { quark: 1 }, yield: { photon: 2 },    yieldStr: '+2 Photons' },
+  // ERA 2: leptons → nuclei
+  { id: 'make_nucleus',  era: 2, name: 'Bind Nucleus',   recipe: { proton: 1, neutron: 1 }, yield: { nucleus: 1 }, yieldStr: '+1 Nucleus' },
+  { id: 'make_deut',     era: 2, name: 'Deuterium Fusion', recipe: { proton: 2, neutron: 2 }, yield: { deuterium: 1 }, yieldStr: '+1 Deuterium' },
+  // ERA 3: nuclei → atoms
+  { id: 'make_hydrogen', era: 3, name: 'Form Hydrogen',  recipe: { nucleus: 1, electron: 1 }, yield: { hydrogen: 1 }, yieldStr: '+1 H' },
+  { id: 'make_helium',   era: 3, name: 'Form Helium',    recipe: { helium4: 1, electron: 2 }, yield: { helium: 1 }, yieldStr: '+1 He' },
+  { id: 'make_helium4',  era: 3, name: 'Alpha Particle', recipe: { proton: 2, neutron: 2, nucleus: 2 }, yield: { helium4: 1 }, yieldStr: '+1 He-4' },
+  // ERA 4: atoms → molecules
+  { id: 'make_h2',       era: 4, name: 'Bind H₂',        recipe: { hydrogen: 2 },                      yield: { h2: 1 }, yieldStr: '+1 H₂' },
+  { id: 'make_h2o',      era: 4, name: 'Synthesize H₂O', recipe: { hydrogen: 2, oxygen: 1 },           yield: { h2o: 2 }, yieldStr: '+2 H₂O' },
+  { id: 'make_co2',      era: 4, name: 'Form CO₂',       recipe: { carbon: 1, oxygen: 2 },             yield: { co2: 1 }, yieldStr: '+1 CO₂' },
+  { id: 'make_nh3',      era: 4, name: 'Bind NH₃',       recipe: { nitrogen: 1, hydrogen: 3 },         yield: { nh3: 1 }, yieldStr: '+1 NH₃' },
+  { id: 'make_ch4',      era: 4, name: 'Form CH₄',       recipe: { carbon: 1, hydrogen: 4 },           yield: { ch4: 1 }, yieldStr: '+1 CH₄' },
+  // ERA 5: molecules → organics
+  { id: 'make_organic',  era: 5, name: 'Carbon Chain',   recipe: { co2: 2, h2o: 3, ch4: 1 },          yield: { organic: 1 }, yieldStr: '+1 Organic Mol.' },
+  { id: 'make_lipid',    era: 5, name: 'Lipid Assembly', recipe: { organic: 3, h2: 4 },                yield: { lipid: 1 }, yieldStr: '+1 Lipid' },
+  { id: 'make_sugar',    era: 5, name: 'Sugar Ring',     recipe: { organic: 2, h2o: 4, co2: 1 },      yield: { sugar: 2 }, yieldStr: '+2 Sugars' },
+  { id: 'make_phosph',   era: 5, name: 'Phosphate Bond', recipe: { organic: 2, h2o: 2 },              yield: { phosphate: 1 }, yieldStr: '+1 Phosphate' },
+  // ERA 6: organics → materials
+  { id: 'make_crystal',  era: 6, name: 'Crystal Lattice',recipe: { silicate: 3, calcite: 1 },         yield: { crystal: 1 }, yieldStr: '+1 Crystal' },
+  { id: 'make_silicate', era: 6, name: 'Silicate Form',  recipe: { organic: 4, h2o: 3 },              yield: { silicate: 2 }, yieldStr: '+2 Silicates' },
+  { id: 'make_iron',     era: 6, name: 'Iron Oxidation', recipe: { organic: 3, h2o: 4 },              yield: { iron: 1 }, yieldStr: '+1 Iron Oxide' },
+  { id: 'make_calcite',  era: 6, name: 'Calcite Deposit',recipe: { co2: 2, h2o: 2, calcium: 1 },     yield: { calcite: 1 }, yieldStr: '+1 Calcite', special: true },
+  // ERA 7: materials → prebiotic
+  { id: 'make_amino',    era: 7, name: 'Amino Acid',     recipe: { organic: 5, nh3: 2, h2o: 3 },     yield: { amino: 1 }, yieldStr: '+1 Amino Acid' },
+  { id: 'make_nucleot',  era: 7, name: 'Nucleotide',     recipe: { sugar: 3, phosphate: 2, nh3: 1 }, yield: { nucleotide: 1 }, yieldStr: '+1 Nucleotide' },
+  { id: 'make_peptide',  era: 7, name: 'Peptide Chain',  recipe: { amino: 4 },                        yield: { peptide: 1 }, yieldStr: '+1 Peptide' },
+  { id: 'make_membrane', era: 7, name: 'Lipid Membrane', recipe: { lipid: 5, h2o: 6 },               yield: { membrane: 1 }, yieldStr: '+1 Membrane' },
+  // ERA 8: prebiotic → life
+  { id: 'make_rna',      era: 8, name: 'RNA Molecule',   recipe: { nucleotide: 5, peptide: 2 },       yield: { rna: 1 }, yieldStr: '+1 RNA' },
+  { id: 'make_dna',      era: 8, name: 'DNA Strand',     recipe: { rna: 3, nucleotide: 8 },           yield: { dna: 1 }, yieldStr: '+1 DNA' },
+  { id: 'make_protein',  era: 8, name: 'Protein Fold',   recipe: { peptide: 6, rna: 1 },              yield: { protein: 1 }, yieldStr: '+1 Protein' },
+  { id: 'make_cell',     era: 8, name: 'Protocell',      recipe: { dna: 2, protein: 3, membrane: 3 }, yield: { cell_unit: 1 }, yieldStr: '+1 Protocell' },
+];
+
+const AUTOMATORS = [
+  // Quark era
+  { id: 'quark_osc',   era: 0, name: 'Quantum Oscillator',  desc: 'Produces quarks from vacuum energy', cost: { quark: 15 },       produces: { quark: 0.5 },     baseCost: { quark: 15 },       costMult: 1.15 },
+  { id: 'quark_field', era: 0, name: 'Quark Field Tap',     desc: 'Taps the quark field continuously',  cost: { quark: 120 },      produces: { quark: 3 },       baseCost: { quark: 120 },      costMult: 1.15 },
+  // Hadron era
+  { id: 'proton_gun',  era: 1, name: 'Proton Collider',     desc: 'Auto-fuses protons from quarks',     cost: { proton: 10 },      produces: { proton: 0.5 },    baseCost: { proton: 10 },      costMult: 1.15 },
+  { id: 'neutron_gen', era: 1, name: 'Neutron Generator',   desc: 'Generates neutrons passively',       cost: { neutron: 10 },     produces: { neutron: 0.5 },   baseCost: { neutron: 10 },     costMult: 1.15 },
+  { id: 'photon_emit', era: 1, name: 'Photon Emitter',      desc: 'Emits photons continuously',         cost: { proton: 50 },      produces: { photon: 2 },      baseCost: { proton: 50 },      costMult: 1.15 },
+  // Lepton
+  { id: 'e_trap',      era: 2, name: 'Electron Trap',       desc: 'Captures free electrons',            cost: { electron: 8 },     produces: { electron: 0.8 },  baseCost: { electron: 8 },     costMult: 1.15 },
+  // Nucleon
+  { id: 'nuc_forge',   era: 3, name: 'Nuclear Forge',       desc: 'Binds nuclei automatically',         cost: { nucleus: 5 },      produces: { nucleus: 0.3 },   baseCost: { nucleus: 5 },      costMult: 1.15 },
+  { id: 'deut_reactor',era: 3, name: 'Deuterium Reactor',   desc: 'Fuses deuterium continuously',       cost: { deuterium: 3 },    produces: { deuterium: 0.15 },baseCost: { deuterium: 3 },    costMult: 1.15 },
+  // Atom era
+  { id: 'h_cloud',     era: 4, name: 'Hydrogen Nebula',     desc: 'Slowly forms hydrogen atoms',        cost: { hydrogen: 20 },    produces: { hydrogen: 1 },    baseCost: { hydrogen: 20 },    costMult: 1.15 },
+  { id: 'stellar_nuc', era: 4, name: 'Stellar Furnace',     desc: 'Stellar nucleosynthesis engine',     cost: { hydrogen: 200 },   produces: { carbon: 0.5, oxygen: 0.5, hydrogen: 2 }, baseCost: { hydrogen: 200 }, costMult: 1.15 },
+  // Molecule
+  { id: 'mol_bond',    era: 5, name: 'Molecular Bonder',    desc: 'Auto-assembles water molecules',     cost: { h2o: 30 },         produces: { h2o: 1.5 },       baseCost: { h2o: 30 },         costMult: 1.15 },
+  { id: 'atmo_proc',   era: 5, name: 'Atmosphere Processor',desc: 'Cycles CO₂ and CH₄',                cost: { co2: 20 },         produces: { co2: 0.8, ch4: 0.5 },baseCost:{ co2: 20 },        costMult: 1.15 },
+  // Compound
+  { id: 'org_synth',   era: 6, name: 'Organic Synthesizer', desc: 'Miller-Urey style chemistry',        cost: { organic: 50 },     produces: { organic: 2, lipid: 0.3 }, baseCost: { organic: 50 }, costMult: 1.15 },
+  { id: 'hydro_vent',  era: 6, name: 'Hydrothermal Vent',   desc: 'Deep-sea chemistry engine',          cost: { organic: 300 },    produces: { organic: 8, amino: 0.1 }, baseCost: { organic: 300 },costMult: 1.15 },
+  // Material
+  { id: 'min_press',   era: 7, name: 'Mineral Press',       desc: 'Crystallizes minerals over time',    cost: { crystal: 40 },     produces: { crystal: 1.5, silicate: 0.8 }, baseCost: { crystal: 40 }, costMult: 1.15 },
+  { id: 'geol_cycle',  era: 7, name: 'Geological Cycle',    desc: 'Tectonic mineral cycling',           cost: { crystal: 250 },    produces: { crystal: 5, iron: 1, calcite: 1 }, baseCost: { crystal: 250 }, costMult: 1.15 },
+  // Cell
+  { id: 'tide_pool',   era: 8, name: 'Tidal Pool',          desc: 'Concentration of prebiotics',        cost: { amino: 30 },       produces: { amino: 1, nucleotide: 0.3 }, baseCost: { amino: 30 }, costMult: 1.15 },
+  { id: 'rna_world',   era: 8, name: 'RNA World Engine',    desc: 'Self-replicating RNA system',        cost: { rna: 10 },         produces: { rna: 0.5, nucleotide: 1 }, baseCost: { rna: 10 }, costMult: 1.15 },
+  // Life
+  { id: 'proto_div',   era: 9, name: 'Protocell Division',  desc: 'First cells divide and replicate',   cost: { cell_unit: 10 },   produces: { cell_unit: 0.4, protein: 0.5, dna: 0.2 }, baseCost: { cell_unit: 10 }, costMult: 1.15 },
+  { id: 'evol_press',  era: 9, name: 'Evolutionary Pressure',desc: 'Selection drives complexity',       cost: { cell_unit: 100 },  produces: { cell_unit: 2, protein: 2, dna: 1 }, baseCost: { cell_unit: 100 }, costMult: 1.15 },
+];
+
+const UPGRADES = [
+  { id: 'u_click1',  era: 0, name: 'Quark Resonance',      desc: '+2 per click',          cost: { quark: 80 },       apply: () => G.mult.click += 1 },
+  { id: 'u_click2',  era: 1, name: 'Hadron Boost',         desc: 'Click yield ×2',        cost: { proton: 50 },      apply: () => G.mult.click *= 2 },
+  { id: 'u_auto1',   era: 1, name: 'Quantum Coherence',    desc: 'Auto production ×1.5',  cost: { proton: 200 },     apply: () => G.mult.auto *= 1.5 },
+  { id: 'u_click3',  era: 2, name: 'Electron Cascade',     desc: 'Click yield ×2',        cost: { electron: 100 },   apply: () => G.mult.click *= 2 },
+  { id: 'u_auto2',   era: 2, name: 'Lepton Flux',          desc: 'Auto production ×1.5',  cost: { electron: 400 },   apply: () => G.mult.auto *= 1.5 },
+  { id: 'u_click4',  era: 3, name: 'Nuclear Force',        desc: 'Click yield ×3',        cost: { nucleus: 50 },     apply: () => G.mult.click *= 3 },
+  { id: 'u_auto3',   era: 3, name: 'Fusion Efficiency',    desc: 'Auto production ×2',    cost: { nucleus: 200 },    apply: () => G.mult.auto *= 2 },
+  { id: 'u_click5',  era: 4, name: 'Atomic Resonance',     desc: 'Click yield ×3',        cost: { hydrogen: 300 },   apply: () => G.mult.click *= 3 },
+  { id: 'u_synth1',  era: 4, name: 'Valence Optimization', desc: 'Synth costs ×0.8',      cost: { hydrogen: 500 },   apply: () => G.mult.synthCost *= 0.8 },
+  { id: 'u_auto4',   era: 4, name: 'Stellar Evolution',    desc: 'Auto production ×2',    cost: { carbon: 200 },     apply: () => G.mult.auto *= 2 },
+  { id: 'u_click6',  era: 5, name: 'Molecular Harmonics',  desc: 'Click yield ×4',        cost: { h2o: 500 },        apply: () => G.mult.click *= 4 },
+  { id: 'u_auto5',   era: 5, name: 'Reaction Catalysis',   desc: 'Auto production ×2',    cost: { h2o: 2000 },       apply: () => G.mult.auto *= 2 },
+  { id: 'u_click7',  era: 6, name: 'Organic Chemistry',    desc: 'Click yield ×5',        cost: { organic: 1000 },   apply: () => G.mult.click *= 5 },
+  { id: 'u_auto6',   era: 6, name: 'Entropy Reversal',     desc: 'Auto production ×2',    cost: { organic: 5000 },   apply: () => G.mult.auto *= 2 },
+  { id: 'u_click8',  era: 7, name: 'Geological Memory',    desc: 'Click yield ×5',        cost: { crystal: 500 },    apply: () => G.mult.click *= 5 },
+  { id: 'u_auto7',   era: 7, name: 'Deep Time Compression',desc: 'Auto production ×3',    cost: { crystal: 3000 },   apply: () => G.mult.auto *= 3 },
+  { id: 'u_click9',  era: 8, name: 'Prebiotic Momentum',   desc: 'Click yield ×8',        cost: { amino: 500 },      apply: () => G.mult.click *= 8 },
+  { id: 'u_auto8',   era: 8, name: 'RNA World Emergence',  desc: 'Auto production ×3',    cost: { amino: 3000 },     apply: () => G.mult.auto *= 3 },
+  { id: 'u_click10', era: 9, name: 'First Breath',         desc: 'Click yield ×10',       cost: { dna: 100 },        apply: () => G.mult.click *= 10 },
+  { id: 'u_auto9',   era: 9, name: 'Natural Selection',    desc: 'Auto production ×4',    cost: { protein: 200 },    apply: () => G.mult.auto *= 4 },
+];
+
+const RESEARCH = [
+  { id: 'r1', era: 0, name: 'Standard Model',       desc: 'Unlock neutron production',  cost: { quark: 500 },       apply: () => {} },
+  { id: 'r2', era: 1, name: 'QED Theory',            desc: 'Photons generate 3×',       cost: { photon: 100 },      apply: () => {} },
+  { id: 'r3', era: 2, name: 'Nucleon Binding',       desc: 'Nucleus synth 50% cheaper', cost: { electron: 200 },    apply: () => G.mult.synthCost *= 0.85 },
+  { id: 'r4', era: 3, name: 'Big Bang Nucleosynth.', desc: 'Unlock heavier atoms',      cost: { nucleus: 100 },     apply: () => {} },
+  { id: 'r5', era: 4, name: 'Spectroscopy',          desc: 'Identify atom properties',  cost: { hydrogen: 1000 },   apply: () => G.mult.auto *= 1.3 },
+  { id: 'r6', era: 5, name: 'Thermodynamics',        desc: 'Reaction efficiency +30%',  cost: { h2o: 3000 },        apply: () => G.mult.auto *= 1.3 },
+  { id: 'r7', era: 6, name: 'Polymer Chemistry',     desc: 'Long-chain molecules form faster', cost: { organic: 8000 }, apply: () => G.mult.auto *= 1.5 },
+  { id: 'r8', era: 7, name: 'Mineralogy',            desc: 'Crystal auto ×2',           cost: { crystal: 5000 },    apply: () => G.mult.auto *= 2 },
+  { id: 'r9', era: 8, name: 'Origin of Life Theory', desc: 'All prebiotics ×2',         cost: { amino: 5000 },      apply: () => G.mult.auto *= 2 },
+  { id: 'r10',era: 9, name: 'Central Dogma',         desc: 'DNA→RNA→Protein efficiency', cost: { dna: 500 },        apply: () => G.mult.auto *= 3 },
+];
+
+// WIN CONDITION
+const WIN_RESOURCE = 'cell_unit';
+const WIN_AMOUNT = 500;
+
+// ========================================
+// GAME STATE
+// ========================================
+const G = {
+  era: 0,
+  res: {},
+  autoOwned: {},  // id → count
+  upgBought: {},
+  resBought: {},
+  mult: { click: 1, auto: 1, synthCost: 1 },
+  totalSynths: 0,
+  startTime: Date.now(),
+  tick: 0,
+  eraProgress: 0, // cumulative resource gained in current era trigger resource
+};
+
+// Init resources
+RESOURCES.forEach(r => { G.res[r.id] = 0; });
+G.res.calcium = 0; // bonus resource
+
+// ========================================
+// HELPERS
+// ========================================
+function fmt(n) {
+  if (n === undefined || n === null) return '0';
+  if (n < 1000) return Math.floor(n).toString();
+  if (n < 1e6) return (n/1e3).toFixed(1) + 'K';
+  if (n < 1e9) return (n/1e6).toFixed(2) + 'M';
+  if (n < 1e12) return (n/1e9).toFixed(2) + 'B';
+  return (n/1e12).toFixed(2) + 'T';
+}
+
+function fmtRate(n) {
+  if (!n || n < 0.001) return '';
+  return '+' + (n >= 1 ? fmt(n) : n.toFixed(2)) + '/s';
+}
+
+function elapsed() {
+  const s = Math.floor((Date.now() - G.startTime) / 1000);
+  const m = Math.floor(s / 60);
+  const h = Math.floor(m / 60);
+  if (h > 0) return `${h}:${String(m%60).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`;
+  return `${String(m).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`;
+}
+
+// ========================================
+// CLICK HANDLER
+// ========================================
+function handleClick(e) {
+  const era = ERAS[G.era];
+  const amt = era.clickAmt();
+  G.res[era.clickResource] = (G.res[era.clickResource] || 0) + amt;
+  G.totalSynths += amt;
+  trackEraProgress(era.clickResource, amt);
+
+  // floaty
+  const rect = document.getElementById('click-zone').getBoundingClientRect();
+  floaty(e.clientX, e.clientY, `+${fmt(amt)} ${RESOURCES.find(r=>r.id===era.clickResource)?.name || era.clickResource}`, era.color);
+
+  // pulse the core
+  const core = document.getElementById('core-nucleus');
+  core.style.r = '14';
+  setTimeout(() => core.style.r = '8', 200);
+
+  checkEraAdvance();
+  renderAll();
+}
+
+function trackEraProgress(resId, amt) {
+  const era = ERAS[G.era];
+  if (resId === era.clickResource) {
+    G.eraProgress += amt;
+  }
+}
+
+// ========================================
+// SYNTHESIS
+// ========================================
+function doSynth(recipe) {
+  // check resources
+  for (const [k, v] of Object.entries(recipe.recipe)) {
+    const needed = Math.ceil(v * G.mult.synthCost);
+    if ((G.res[k] || 0) < needed) return;
+  }
+  // deduct
+  for (const [k, v] of Object.entries(recipe.recipe)) {
+    G.res[k] -= Math.ceil(v * G.mult.synthCost);
+  }
+  // yield
+  for (const [k, v] of Object.entries(recipe.yield)) {
+    G.res[k] = (G.res[k] || 0) + v;
+    G.totalSynths += v;
+    trackEraProgress(k, v);
+  }
+
+  floatyCenter(`✦ ${recipe.yieldStr}`, '#ffe135');
+  checkEraAdvance();
+  renderAll();
+}
+
+// ========================================
+// AUTOMATORS
+// ========================================
+function buyAuto(autoId) {
+  const a = AUTOMATORS.find(x => x.id === autoId);
+  if (!a) return;
+  const count = G.autoOwned[autoId] || 0;
+  const mult = Math.pow(a.costMult, count);
+  // check cost
+  for (const [k, v] of Object.entries(a.baseCost)) {
+    if ((G.res[k] || 0) < v * mult) return;
+  }
+  // deduct
+  for (const [k, v] of Object.entries(a.baseCost)) {
+    G.res[k] -= v * mult;
+  }
+  G.autoOwned[autoId] = count + 1;
+  addLog(`Acquired: ${a.name} (×${count+1})`, 'milestone');
+  renderAll();
+}
+
+function getAutoCost(a) {
+  const count = G.autoOwned[a.id] || 0;
+  const mult = Math.pow(a.costMult, count);
+  const parts = Object.entries(a.baseCost).map(([k,v]) => `${fmt(v*mult)} ${k}`);
+  return parts.join(' + ');
+}
+
+function computeAutoRate() {
+  // returns per-second production map
+  const rates = {};
+  AUTOMATORS.forEach(a => {
+    const count = G.autoOwned[a.id] || 0;
+    if (count === 0) return;
+    for (const [k, v] of Object.entries(a.produces)) {
+      rates[k] = (rates[k] || 0) + v * count * G.mult.auto;
+    }
+  });
+  return rates;
+}
+
+// ========================================
+// UPGRADES / RESEARCH
+// ========================================
+function buyUpgrade(uid) {
+  const u = [...UPGRADES, ...RESEARCH].find(x => x.id === uid);
+  if (!u || G.upgBought[uid]) return;
+  for (const [k,v] of Object.entries(u.cost)) {
+    if ((G.res[k]||0) < v) return;
+  }
+  for (const [k,v] of Object.entries(u.cost)) {
+    G.res[k] -= v;
+  }
+  G.upgBought[uid] = true;
+  u.apply();
+  addLog(`Research: ${u.name}`, 'milestone');
+  renderAll();
+}
+
+// ========================================
+// ERA ADVANCE
+// ========================================
+function checkEraAdvance() {
+  if (G.era >= ERAS.length - 1) {
+    // check win
+    if ((G.res[WIN_RESOURCE] || 0) >= WIN_AMOUNT) {
+      showWin();
+    }
+    return;
+  }
+  const nextEra = ERAS[G.era + 1];
+  // check if primary resource threshold met
+  const era = ERAS[G.era];
+  const primaryRes = G.res[era.clickResource] || 0;
+  if (primaryRes >= era.threshold || G.eraProgress >= era.threshold) {
+    advanceEra();
+  }
+}
+
+function advanceEra() {
+  G.era++;
+  G.eraProgress = 0;
+  const era = ERAS[G.era];
+
+  // show transition
+  const overlay = document.getElementById('era-transition');
+  document.getElementById('era-transition-text').textContent = era.name.toUpperCase();
+  document.getElementById('era-transition-sub').textContent = `Era ${G.era + 1} of ${ERAS.length} — Click to continue`;
+  overlay.classList.add('active');
+  overlay.style.borderColor = era.color;
+  overlay.onclick = () => overlay.classList.remove('active');
+
+  // Update core color
+  document.getElementById('core-nucleus').setAttribute('fill', era.color);
+  document.getElementById('core-svg').style.filter = `drop-shadow(0 0 20px ${era.color})`;
+
+  addLog(`◈ ERA ADVANCE → ${era.name}`, 'milestone');
+  addLog(`New click resource: ${RESOURCES.find(r=>r.id===era.clickResource)?.name}`, 'milestone');
+
+  renderAll();
+}
+
+// ========================================
+// GAME LOOP
+// ========================================
+let lastTick = Date.now();
+
+function gameTick() {
+  const now = Date.now();
+  const dt = (now - lastTick) / 1000;
+  lastTick = now;
+
+  const rates = computeAutoRate();
+  for (const [k, v] of Object.entries(rates)) {
+    G.res[k] = (G.res[k] || 0) + v * dt;
+    trackEraProgress(k, v * dt);
+    G.totalSynths += v * dt;
+  }
+
+  checkEraAdvance();
+
+  G.tick++;
+  if (G.tick % 10 === 0) renderAll(); // render ~2x/sec
+
+  // win
+  if ((G.res[WIN_RESOURCE] || 0) >= WIN_AMOUNT) showWin();
+}
+
+setInterval(gameTick, 100);
+
+// ========================================
+// LOG
+// ========================================
+const logLines = [];
+function addLog(msg, type = 'neutral') {
+  logLines.unshift({ msg, type });
+  if (logLines.length > 40) logLines.pop();
+  const box = document.getElementById('log-scroll');
+  box.innerHTML = logLines.map(l => `<div class="log-line ${l.type}">[${elapsed()}] ${l.msg}</div>`).join('');
+}
+
+// ========================================
+// FLOATIES
+// ========================================
+function floaty(x, y, text, color = '#00d4ff') {
+  const el = document.createElement('div');
+  el.className = 'floaty';
+  el.textContent = text;
+  el.style.color = color;
+  el.style.left = x + 'px';
+  el.style.top = (y - 10) + 'px';
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 1200);
+}
+
+function floatyCenter(text, color) {
+  const el = document.createElement('div');
+  el.className = 'floaty';
+  el.textContent = text;
+  el.style.color = color || '#ffe135';
+  el.style.left = '50%';
+  el.style.top = '50%';
+  el.style.transform = 'translateX(-50%)';
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 1200);
+}
+
+// ========================================
+// TABS
+// ========================================
+let activeTab = 'synth';
+function setTab(t) {
+  activeTab = t;
+  document.querySelectorAll('.c-tab').forEach((b, i) => {
+    const tabs = ['synth','upgrades','research'];
+    b.classList.toggle('active', tabs[i] === t);
+  });
+  document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+  document.getElementById('tab-' + t).classList.add('active');
+}
+
+// ========================================
+// RENDER
+// ========================================
+function renderAll() {
+  renderResources();
+  renderSynth();
+  renderAutomators();
+  renderUpgrades();
+  renderHeader();
+  renderEraBar();
+  updateClickLabel();
+}
+
+function renderResources() {
+  const list = document.getElementById('res-list');
+  const visibleRes = RESOURCES.filter(r => r.era <= G.era);
+  const rates = computeAutoRate();
+
+  list.innerHTML = visibleRes.map(r => {
+    const val = G.res[r.id] || 0;
+    const rate = rates[r.id] || 0;
+    return `
+      <div class="res-row">
+        <div class="res-info">
+          <div class="res-dot" style="color:${r.color};background:${r.color}"></div>
+          <span class="res-name">${r.name}</span>
+        </div>
+        <div class="res-vals">
+          <span class="res-count">${fmt(val)}</span>
+          ${rate > 0 ? `<span class="res-rate">${fmtRate(rate)}</span>` : ''}
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function renderSynth() {
+  const grid = document.getElementById('synthesis-grid');
+  const visible = SYNTH_RECIPES.filter(r => r.era <= G.era && !r.special);
+  grid.innerHTML = visible.map(r => {
+    const costParts = Object.entries(r.recipe).map(([k, v]) => {
+      const need = Math.ceil(v * G.mult.synthCost);
+      const have = G.res[k] || 0;
+      const ok = have >= need;
+      return `<span style="color:${ok?'var(--text3)':'var(--accent3)'}">${need} ${k}</span>`;
+    });
+    const canDo = Object.entries(r.recipe).every(([k,v]) => (G.res[k]||0) >= Math.ceil(v*G.mult.synthCost));
+    return `
+      <button class="synth-btn" onclick="doSynth(SYNTH_RECIPES.find(x=>x.id==='${r.id}'))" ${canDo?'':'disabled'}>
+        <span class="sb-name">${r.name}</span>
+        <span class="sb-recipe">${costParts.join(' + ')}</span>
+        <span class="sb-yield">${r.yieldStr}</span>
+      </button>`;
+  }).join('');
+}
+
+function renderAutomators() {
+  const list = document.getElementById('automators-list');
+  const visible = AUTOMATORS.filter(a => a.era <= G.era);
+  const rates = computeAutoRate();
+
+  list.innerHTML = visible.map(a => {
+    const count = G.autoOwned[a.id] || 0;
+    const mult = Math.pow(a.costMult, count);
+    const canBuy = Object.entries(a.baseCost).every(([k,v]) => (G.res[k]||0) >= v*mult);
+    const rateStr = Object.entries(a.produces).map(([k,v]) => `${(v*G.mult.auto).toFixed(2)} ${k}/s`).join(', ');
+
+    return `
+      <div class="auto-card ${canBuy?'':''}${count>0?' owned':''}" onclick="buyAuto('${a.id}')">
+        <div class="ac-top">
+          <span class="ac-name">${a.name}</span>
+          ${count > 0 ? `<span class="ac-count">×${count}</span>` : ''}
+        </div>
+        <div class="ac-desc">${a.desc}</div>
+        <div class="ac-cost">Cost: ${getAutoCost(a)}</div>
+        <div class="ac-rate">▸ ${rateStr}</div>
+      </div>`;
+  }).join('');
+}
+
+function renderUpgrades() {
+  // upgrades tab
+  const upgList = document.getElementById('upgrades-list');
+  const vis = UPGRADES.filter(u => u.era <= G.era);
+  upgList.innerHTML = vis.map(u => {
+    const bought = !!G.upgBought[u.id];
+    const costStr = Object.entries(u.cost).map(([k,v])=>`${fmt(v)} ${k}`).join(' + ');
+    const canBuy = !bought && Object.entries(u.cost).every(([k,v])=>(G.res[k]||0)>=v);
+    return `
+      <button class="upg-btn ${bought?'bought':''}" onclick="buyUpgrade('${u.id}')" ${bought||!canBuy?'disabled':''}>
+        <div class="upg-info">
+          <span class="upg-name">${bought?'✓ ':' '}${u.name}</span>
+          <span class="upg-desc">${u.desc}</span>
+        </div>
+        <span class="upg-cost">${bought?'Owned':costStr}</span>
+      </button>`;
+  }).join('');
+
+  // research tab
+  const resList = document.getElementById('research-list');
+  const visR = RESEARCH.filter(u => u.era <= G.era);
+  resList.innerHTML = visR.map(u => {
+    const bought = !!G.upgBought[u.id];
+    const costStr = Object.entries(u.cost).map(([k,v])=>`${fmt(v)} ${k}`).join(' + ');
+    const canBuy = !bought && Object.entries(u.cost).every(([k,v])=>(G.res[k]||0)>=v);
+    return `
+      <button class="upg-btn ${bought?'bought':''}" onclick="buyUpgrade('${u.id}')" ${bought||!canBuy?'disabled':''}>
+        <div class="upg-info">
+          <span class="upg-name">${bought?'✓ ':' '}${u.name}</span>
+          <span class="upg-desc">${u.desc}</span>
+        </div>
+        <span class="upg-cost">${bought?'Completed':costStr}</span>
+      </button>`;
+  }).join('');
+}
+
+function renderHeader() {
+  const rates = computeAutoRate();
+  const totalRate = Object.values(rates).reduce((a,b)=>a+b, 0);
+  document.getElementById('h-rate').textContent = fmtRate(totalRate) || '0/s';
+  document.getElementById('h-prestige').textContent = `Era ${G.era+1}/${ERAS.length}`;
+  document.getElementById('h-time').textContent = elapsed();
+  document.getElementById('era-name').textContent = ERAS[G.era].name;
+  document.getElementById('era-name').style.color = ERAS[G.era].color;
+}
+
+function renderEraBar() {
+  const era = ERAS[G.era];
+  const target = era.clickResource;
+  const threshold = era.threshold;
+  const have = G.res[target] || 0;
+
+  let pct;
+  if (threshold === Infinity) {
+    pct = Math.min(100, (have / WIN_AMOUNT) * 100);
+    document.getElementById('era-prog-text').textContent = `${fmt(have)} / ${fmt(WIN_AMOUNT)} ${WIN_RESOURCE}`;
+    document.getElementById('era-title-bar').textContent = era.name.toUpperCase();
+  } else {
+    pct = Math.min(100, (have / threshold) * 100);
+    document.getElementById('era-prog-text').textContent = `${fmt(have)} / ${fmt(threshold)}`;
+    document.getElementById('era-title-bar').textContent = era.name.toUpperCase();
+  }
+
+  document.getElementById('era-fill').style.width = pct + '%';
+  document.getElementById('era-fill').style.background = `linear-gradient(90deg, ${era.color}88, ${era.color})`;
+}
+
+function updateClickLabel() {
+  const era = ERAS[G.era];
+  const res = RESOURCES.find(r => r.id === era.clickResource);
+  const amt = era.clickAmt();
+  document.getElementById('click-reward').textContent = `+${fmt(amt)} ${res?.name || era.clickResource} per click`;
+  document.getElementById('click-label').textContent = 'CLICK TO SYNTHESIZE';
+}
+
+// ========================================
+// WIN
+// ========================================
+let winShown = false;
+function showWin() {
+  if (winShown) return;
+  winShown = true;
+  const t = Math.floor((Date.now() - G.startTime) / 1000);
+  const m = Math.floor(t/60), s = t%60;
+  document.getElementById('win-stats').innerHTML =
+    `You synthesized life from raw quarks.\n\nTime: ${m}m ${s}s\nTotal Synthesized: ${fmt(G.totalSynths)}\nEras Traversed: ${G.era + 1} / ${ERAS.length}\nProtocells Created: ${fmt(G.res[WIN_RESOURCE] || 0)}`;
+  document.getElementById('win-screen').classList.add('active');
+}
+
+// ========================================
+// INITIAL LOG
+// ========================================
+addLog('◈ The universe begins. Time = 0.', 'milestone');
+addLog('Click the particle to synthesize quarks.', 'neutral');
+addLog('Combine quarks → protons → atoms → life.', 'neutral');
+renderAll();
+</script>
+</body>
+</html>
