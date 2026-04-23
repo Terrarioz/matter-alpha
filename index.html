@@ -32,6 +32,11 @@
   --accent: #00d4ff;
   --font-display: 'Orbitron', monospace;
   --font-body: 'Rajdhani', sans-serif;
+  
+  --civ-good: #4ade80;
+  --civ-bad: #ef4444;
+  --civ-war: #f97316;
+  --civ-space: #a855f7;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -45,7 +50,7 @@ html, body {
 }
 
 /* === CANVAS BACKGROUND === */
-#bg-canvas {
+#bg-canvas, #civ-canvas {
   position: fixed;
   inset: 0;
   z-index: 0;
@@ -62,6 +67,7 @@ html, body {
   height: 100vh;
   width: 100vw;
   gap: 0;
+  transition: opacity 1s;
 }
 
 /* === HEADER === */
@@ -181,616 +187,165 @@ html, body {
 
 /* Resource rows */
 .res-group { margin-bottom: 6px; }
-
-.res-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 5px 0;
-  border-bottom: 1px solid rgba(255,255,255,0.03);
-  transition: opacity 0.3s;
-}
-
+.res-row { display: flex; justify-content: space-between; align-items: center; padding: 5px 0; border-bottom: 1px solid rgba(255,255,255,0.03); transition: opacity 0.3s; }
 .res-row.locked { opacity: 0.2; filter: blur(0.5px); }
-
 .res-info { display: flex; align-items: center; gap: 8px; }
-
-.res-dot {
-  width: 8px; height: 8px;
-  border-radius: 50%;
-  box-shadow: 0 0 6px currentColor;
-  flex-shrink: 0;
-}
-
-.res-name {
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--text3);
-  letter-spacing: 0.03em;
-}
-
+.res-dot { width: 8px; height: 8px; border-radius: 50%; box-shadow: 0 0 6px currentColor; flex-shrink: 0; }
+.res-name { font-size: 13px; font-weight: 500; color: var(--text3); letter-spacing: 0.03em; }
 .res-vals { text-align: right; }
-
-.res-count {
-  font-family: var(--font-display);
-  font-size: 12px;
-  display: block;
-  color: var(--text);
-}
-
-.res-rate {
-  font-size: 10px;
-  color: var(--text2);
-  font-family: var(--font-display);
-}
+.res-count { font-family: var(--font-display); font-size: 12px; display: block; color: var(--text); }
+.res-rate { font-size: 10px; color: var(--text2); font-family: var(--font-display); }
 
 /* === CENTER PANEL === */
-#center-panel {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
-  padding: 20px;
-  gap: 16px;
-  overflow-y: auto;
-  background: rgba(6,10,18,0.8);
-  position: relative;
-}
-
+#center-panel { display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding: 20px; gap: 16px; overflow-y: auto; background: rgba(6,10,18,0.8); position: relative; }
 #center-panel::-webkit-scrollbar { width: 3px; }
 #center-panel::-webkit-scrollbar-thumb { background: var(--border2); }
 
 /* Main click area */
-#click-zone {
-  position: relative;
-  width: 220px;
-  height: 220px;
-  flex-shrink: 0;
-  cursor: pointer;
-  user-select: none;
-}
-
-#click-core {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  transition: transform 0.1s;
-}
-
+#click-zone { position: relative; width: 220px; height: 220px; flex-shrink: 0; cursor: pointer; user-select: none; }
+#click-core { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; border-radius: 50%; transition: transform 0.1s; }
 #click-core:active { transform: scale(0.94); }
-
-#core-svg {
-  width: 100%;
-  height: 100%;
-  filter: drop-shadow(0 0 20px var(--accent));
-  transition: filter 0.5s;
-}
-
-.orbit-ring {
-  position: absolute;
-  inset: 0;
-  border-radius: 50%;
-  border: 1px solid rgba(0,212,255,0.1);
-  animation: orbitSpin linear infinite;
-  pointer-events: none;
-}
-
-.orbit-particle {
-  position: absolute;
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  top: -3px;
-  left: 50%;
-  margin-left: -3px;
-  box-shadow: 0 0 8px currentColor;
-}
-
-@keyframes orbitSpin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
-
-#click-label {
-  position: absolute;
-  bottom: -30px;
-  left: 50%;
-  transform: translateX(-50%);
-  font-family: var(--font-display);
-  font-size: 9px;
-  letter-spacing: 0.3em;
-  color: var(--text2);
-  white-space: nowrap;
-  text-align: center;
-}
-
-#click-reward {
-  position: absolute;
-  bottom: -50px;
-  left: 50%;
-  transform: translateX(-50%);
-  font-family: var(--font-display);
-  font-size: 11px;
-  color: var(--accent);
-  white-space: nowrap;
-}
+#core-svg { width: 100%; height: 100%; filter: drop-shadow(0 0 20px var(--accent)); transition: filter 0.5s; }
+.orbit-ring { position: absolute; inset: 0; border-radius: 50%; border: 1px solid rgba(0,212,255,0.1); animation: orbitSpin linear infinite; pointer-events: none; }
+.orbit-particle { position: absolute; width: 6px; height: 6px; border-radius: 50%; top: -3px; left: 50%; margin-left: -3px; box-shadow: 0 0 8px currentColor; }
+@keyframes orbitSpin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+#click-label { position: absolute; bottom: -30px; left: 50%; transform: translateX(-50%); font-family: var(--font-display); font-size: 9px; letter-spacing: 0.3em; color: var(--text2); white-space: nowrap; text-align: center; }
+#click-reward { position: absolute; bottom: -50px; left: 50%; transform: translateX(-50%); font-family: var(--font-display); font-size: 11px; color: var(--accent); white-space: nowrap; }
 
 /* Era progress bar */
-#era-bar-wrap {
-  width: 100%;
-  max-width: 500px;
-}
-
-.era-bar-top {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  margin-bottom: 6px;
-}
-
-.era-title {
-  font-family: var(--font-display);
-  font-size: 11px;
-  letter-spacing: 0.15em;
-  color: var(--accent);
-}
-
-.era-progress-text {
-  font-family: var(--font-display);
-  font-size: 10px;
-  color: var(--text2);
-}
-
-.era-track {
-  height: 6px;
-  background: var(--surface2);
-  border-radius: 3px;
-  overflow: hidden;
-  border: 1px solid var(--border);
-}
-
-.era-fill {
-  height: 100%;
-  border-radius: 3px;
-  background: linear-gradient(90deg, var(--accent), var(--nucleus));
-  transition: width 0.4s ease;
-  position: relative;
-  overflow: hidden;
-}
-
-.era-fill::after {
-  content: '';
-  position: absolute;
-  top: 0; right: 0; bottom: 0;
-  width: 20px;
-  background: rgba(255,255,255,0.3);
-  animation: shimmer 1s linear infinite;
-}
-
-@keyframes shimmer {
-  from { transform: translateX(20px); }
-  to { transform: translateX(-100px); }
-}
+#era-bar-wrap { width: 100%; max-width: 500px; }
+.era-bar-top { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; }
+.era-title { font-family: var(--font-display); font-size: 11px; letter-spacing: 0.15em; color: var(--accent); }
+.era-progress-text { font-family: var(--font-display); font-size: 10px; color: var(--text2); }
+.era-track { height: 6px; background: var(--surface2); border-radius: 3px; overflow: hidden; border: 1px solid var(--border); }
+.era-fill { height: 100%; border-radius: 3px; background: linear-gradient(90deg, var(--accent), var(--nucleus)); transition: width 0.4s ease; position: relative; overflow: hidden; }
+.era-fill::after { content: ''; position: absolute; top: 0; right: 0; bottom: 0; width: 20px; background: rgba(255,255,255,0.3); animation: shimmer 1s linear infinite; }
+@keyframes shimmer { from { transform: translateX(20px); } to { transform: translateX(-100px); } }
 
 /* Synthesis buttons */
-#synthesis-grid {
-  width: 100%;
-  max-width: 520px;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-}
-
-.synth-btn {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: 12px 14px;
-  cursor: pointer;
-  text-align: left;
-  transition: all 0.2s;
-  position: relative;
-  overflow: hidden;
-  font-family: var(--font-body);
-}
-
-.synth-btn::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(135deg, transparent 0%, rgba(0,212,255,0.04) 100%);
-  opacity: 0;
-  transition: opacity 0.2s;
-}
-
+#synthesis-grid { width: 100%; max-width: 520px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.synth-btn { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 12px 14px; cursor: pointer; text-align: left; transition: all 0.2s; position: relative; overflow: hidden; font-family: var(--font-body); }
+.synth-btn::before { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, transparent 0%, rgba(0,212,255,0.04) 100%); opacity: 0; transition: opacity 0.2s; }
 .synth-btn:hover:not(:disabled)::before { opacity: 1; }
-.synth-btn:hover:not(:disabled) {
-  border-color: var(--border2);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 20px rgba(0,0,0,0.4);
-}
+.synth-btn:hover:not(:disabled) { border-color: var(--border2); transform: translateY(-1px); box-shadow: 0 4px 20px rgba(0,0,0,0.4); }
 .synth-btn:active:not(:disabled) { transform: translateY(0) scale(0.98); }
 .synth-btn:disabled { opacity: 0.3; cursor: not-allowed; }
-
-.synth-btn .sb-name {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--text);
-  letter-spacing: 0.03em;
-  display: block;
-  margin-bottom: 3px;
-}
-
-.synth-btn .sb-recipe {
-  font-size: 11px;
-  color: var(--text2);
-  display: block;
-  margin-bottom: 6px;
-  line-height: 1.5;
-}
-
-.synth-btn .sb-yield {
-  font-family: var(--font-display);
-  font-size: 10px;
-  color: var(--accent);
-}
+.synth-btn .sb-name { font-size: 14px; font-weight: 600; color: var(--text); letter-spacing: 0.03em; display: block; margin-bottom: 3px; }
+.synth-btn .sb-recipe { font-size: 11px; color: var(--text2); display: block; margin-bottom: 6px; line-height: 1.5; }
+.synth-btn .sb-yield { font-family: var(--font-display); font-size: 10px; color: var(--accent); }
 
 /* Log / events */
-#log-panel {
-  width: 100%;
-  max-width: 520px;
-}
-
-#log-scroll {
-  height: 90px;
-  overflow-y: auto;
-  padding: 8px 10px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 4px;
-}
-
+#log-panel { width: 100%; max-width: 520px; }
+#log-scroll { height: 90px; overflow-y: auto; padding: 8px 10px; background: var(--surface); border: 1px solid var(--border); border-radius: 4px; }
 #log-scroll::-webkit-scrollbar { width: 3px; }
 #log-scroll::-webkit-scrollbar-thumb { background: var(--border2); }
-
-.log-line {
-  font-size: 11px;
-  color: var(--text2);
-  padding: 1px 0;
-  font-family: var(--font-display);
-  letter-spacing: 0.03em;
-}
+.log-line { font-size: 11px; color: var(--text2); padding: 1px 0; font-family: var(--font-display); letter-spacing: 0.03em; }
 .log-line.milestone { color: var(--accent); }
 .log-line.warn { color: var(--quark); }
 
 /* === RIGHT PANEL: AUTOMATORS === */
-#right-panel {
-  border-left: 1px solid var(--border);
-  background: rgba(8,14,26,0.95);
-  overflow-y: auto;
-  padding: 16px 14px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
+#right-panel { border-left: 1px solid var(--border); background: rgba(8,14,26,0.95); overflow-y: auto; padding: 16px 14px; display: flex; flex-direction: column; gap: 8px; }
 #right-panel::-webkit-scrollbar { width: 3px; }
 #right-panel::-webkit-scrollbar-thumb { background: var(--border2); }
-
-.auto-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: 10px 12px;
-  transition: all 0.2s;
-  cursor: pointer;
-  position: relative;
-  overflow: hidden;
-}
-
-.auto-card::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(135deg, rgba(0,212,255,0.02), transparent);
-}
-
-.auto-card:hover:not(.locked-card) {
-  border-color: var(--border2);
-  box-shadow: 0 0 15px rgba(0,212,255,0.06);
-}
-
-.auto-card.locked-card {
-  opacity: 0.25;
-  cursor: not-allowed;
-  filter: blur(0.3px);
-}
-
-.auto-card.owned {
-  border-color: rgba(0,212,255,0.3);
-}
-
-.ac-top {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 4px;
-}
-
-.ac-name {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--text3);
-  letter-spacing: 0.03em;
-}
-
-.ac-count {
-  font-family: var(--font-display);
-  font-size: 11px;
-  color: var(--accent);
-  background: rgba(0,212,255,0.1);
-  padding: 1px 6px;
-  border-radius: 10px;
-}
-
-.ac-desc {
-  font-size: 11px;
-  color: var(--text2);
-  margin-bottom: 6px;
-  line-height: 1.5;
-}
-
-.ac-cost {
-  font-family: var(--font-display);
-  font-size: 10px;
-  color: var(--text2);
-}
-
-.ac-rate {
-  font-size: 10px;
-  color: var(--atom);
-  margin-top: 2px;
-  font-family: var(--font-display);
-}
+.auto-card { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 10px 12px; transition: all 0.2s; cursor: pointer; position: relative; overflow: hidden; }
+.auto-card::after { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, rgba(0,212,255,0.02), transparent); }
+.auto-card:hover:not(.locked-card) { border-color: var(--border2); box-shadow: 0 0 15px rgba(0,212,255,0.06); }
+.auto-card.locked-card { opacity: 0.25; cursor: not-allowed; filter: blur(0.3px); }
+.auto-card.owned { border-color: rgba(0,212,255,0.3); }
+.ac-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 4px; }
+.ac-name { font-size: 13px; font-weight: 600; color: var(--text3); letter-spacing: 0.03em; }
+.ac-count { font-family: var(--font-display); font-size: 11px; color: var(--accent); background: rgba(0,212,255,0.1); padding: 1px 6px; border-radius: 10px; }
+.ac-desc { font-size: 11px; color: var(--text2); margin-bottom: 6px; line-height: 1.5; }
+.ac-cost { font-family: var(--font-display); font-size: 10px; color: var(--text2); }
+.ac-rate { font-size: 10px; color: var(--atom); margin-top: 2px; font-family: var(--font-display); }
 
 /* === FLOATIES === */
-.floaty {
-  position: fixed;
-  font-family: var(--font-display);
-  font-size: 12px;
-  pointer-events: none;
-  z-index: 999;
-  animation: floatDrift 1.2s ease-out forwards;
-  text-shadow: 0 0 8px currentColor;
-  white-space: nowrap;
-}
-
-@keyframes floatDrift {
-  0%   { opacity: 1; transform: translateY(0) scale(1); }
-  100% { opacity: 0; transform: translateY(-70px) scale(0.7); }
-}
+.floaty { position: fixed; font-family: var(--font-display); font-size: 12px; pointer-events: none; z-index: 999; animation: floatDrift 1.2s ease-out forwards; text-shadow: 0 0 8px currentColor; white-space: nowrap; }
+@keyframes floatDrift { 0% { opacity: 1; transform: translateY(0) scale(1); } 100% { opacity: 0; transform: translateY(-70px) scale(0.7); } }
 
 /* === ERA TRANSITION OVERLAY === */
 #era-transition {
-  position: fixed;
-  inset: 0;
-  z-index: 500;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  background: rgba(0,0,0,0.9);
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.5s;
+  position: fixed; inset: 0; z-index: 500; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  background: rgba(0,0,0,0.95); opacity: 0; pointer-events: none; transition: opacity 0.5s;
 }
+#era-transition.active { opacity: 1; pointer-events: all; }
+#era-transition-text { font-family: var(--font-display); font-size: 36px; font-weight: 900; letter-spacing: 0.3em; color: var(--accent); text-shadow: 0 0 40px rgba(0,212,255,0.8); text-align: center; margin-bottom: 12px; }
+#era-transition-sub { font-family: var(--font-body); font-size: 18px; color: var(--text); text-align: center; max-width: 600px; margin-bottom: 30px; line-height: 1.6;}
+#era-transition-btn { background: transparent; border: 1px solid var(--accent); color: var(--accent); padding: 10px 20px; cursor: pointer; font-family: var(--font-display); letter-spacing: 0.2em; transition: 0.2s;}
+#era-transition-btn:hover { background: rgba(0,212,255,0.1); }
 
-#era-transition.active {
-  opacity: 1;
-  pointer-events: all;
+/* === CIV GAME MODE (GOD MODE) === */
+#civ-app {
+  display: none; position: relative; z-index: 10; width: 100vw; height: 100vh;
+  grid-template-columns: 280px 1fr 300px; grid-template-rows: 60px 1fr 200px;
+  background: rgba(4,7,15,0.85); color: var(--text); font-family: var(--font-body);
 }
-
-#era-transition-text {
-  font-family: var(--font-display);
-  font-size: 36px;
-  font-weight: 900;
-  letter-spacing: 0.3em;
-  color: var(--accent);
-  text-shadow: 0 0 40px rgba(0,212,255,0.8);
-  text-align: center;
-  margin-bottom: 12px;
-}
-
-#era-transition-sub {
-  font-family: var(--font-display);
-  font-size: 12px;
-  letter-spacing: 0.2em;
-  color: var(--text2);
-  text-align: center;
-}
+#civ-app.active { display: grid; }
+#civ-header { grid-column: 1 / -1; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; border-bottom: 1px solid var(--border); background: rgba(0,0,0,0.5); }
+#civ-header h1 { font-family: var(--font-display); font-size: 18px; letter-spacing: 0.3em; color: var(--life); text-shadow: 0 0 10px var(--life); }
+#civ-god-powers { grid-column: 1; grid-row: 2; border-right: 1px solid var(--border); padding: 20px; display: flex; flex-direction: column; gap: 10px; background: rgba(8,14,26,0.6); overflow-y:auto;}
+#civ-main { grid-column: 2; grid-row: 2; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center;}
+#civ-stats { grid-column: 3; grid-row: 2; border-left: 1px solid var(--border); padding: 20px; background: rgba(8,14,26,0.6); overflow-y:auto;}
+#civ-log { grid-column: 1 / -1; grid-row: 3; border-top: 1px solid var(--border); padding: 15px; background: rgba(4,7,15,0.9); overflow-y: auto; font-family: monospace; font-size: 12px; line-height: 1.5; }
+.god-btn { background: var(--surface2); border: 1px solid var(--border); color: var(--text); padding: 12px; cursor: pointer; text-align: left; font-family: var(--font-display); letter-spacing: 0.1em; transition: 0.2s; border-radius: 4px;}
+.god-btn:hover { border-color: var(--accent); background: rgba(0,212,255,0.1); }
+.civ-card { background: rgba(0,0,0,0.5); border: 1px solid var(--border2); padding: 10px; margin-bottom: 10px; border-radius: 4px; border-left: 3px solid var(--civ-good);}
+.civ-card h3 { font-family: var(--font-display); color: var(--accent); font-size: 14px; margin-bottom: 5px;}
+.civ-card p { font-size: 12px; margin-bottom: 2px; display:flex; justify-content: space-between;}
+.log-civ { color: var(--text3); }
+.log-good { color: var(--civ-good); }
+.log-bad { color: var(--civ-bad); }
+.log-war { color: var(--civ-war); }
+.log-space { color: var(--civ-space); }
 
 /* === CINEMATIC & CREDITS SCREENS === */
-#cinematic-screen {
-  position: fixed; inset: 0; z-index: 700; background: #000;
-  display: none; 
-}
+#cinematic-screen { position: fixed; inset: 0; z-index: 700; background: #000; display: none; }
 #cinematic-screen.active { display: block; }
-#cine-canvas {
-  position: absolute; inset: 0; width: 100%; height: 100%; z-index: 701;
-}
-
-.cine-text {
-  position: absolute;
-  bottom: 10%;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 702;
-  font-family: var(--font-display); font-size: 36px; font-weight: 900; letter-spacing: 0.3em; 
-  color: var(--accent); text-shadow: 0 0 40px rgba(0,212,255,0.8);
-  opacity: 0; transition: opacity 1.5s ease-in-out; text-align: center; white-space: nowrap;
-}
+#cine-canvas { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 701; }
+.cine-text { position: absolute; bottom: 10%; left: 50%; transform: translateX(-50%); z-index: 702; font-family: var(--font-display); font-size: 36px; font-weight: 900; letter-spacing: 0.3em; color: var(--accent); text-shadow: 0 0 40px rgba(0,212,255,0.8); opacity: 0; transition: opacity 1.5s ease-in-out; text-align: center; white-space: nowrap; }
 .cine-text.visible { opacity: 1; }
 
-#credits-screen {
-  position: fixed; inset: 0; z-index: 800; background: #000;
-  display: none; overflow: hidden;
-}
+#credits-screen { position: fixed; inset: 0; z-index: 800; background: #000; display: none; overflow: hidden; }
 #credits-screen.active { display: block; }
-.credits-container {
-  position: absolute; width: 100%; text-align: center;
-  transform: translateY(100vh);
-}
-.credits-container.scroll {
-  animation: creditScroll 30s linear forwards;
-}
+.credits-container { position: absolute; width: 100%; text-align: center; transform: translateY(100vh); }
+.credits-container.scroll { animation: creditScroll 30s linear forwards; }
 .credits-container h1 { font-family: var(--font-display); color: var(--accent); margin-bottom: 40px; font-size: 36px; letter-spacing: 0.3em; text-shadow: 0 0 20px rgba(0,212,255,0.5);}
 .credits-container p { font-family: var(--font-body); color: var(--text); font-size: 20px; margin-bottom: 10px; font-weight: 500;}
 .credits-container .role { color: var(--text2); font-size: 14px; margin-top: 45px; margin-bottom: 5px; letter-spacing: 0.2em; text-transform: uppercase; font-family: var(--font-display); }
-
-@keyframes creditScroll {
-  0% { transform: translateY(100vh); }
-  100% { transform: translateY(-150%); }
-}
+@keyframes creditScroll { 0% { transform: translateY(100vh); } 100% { transform: translateY(-150%); } }
 
 /* === WIN SCREEN === */
-#win-screen {
-  position: fixed;
-  inset: 0;
-  z-index: 900;
-  display: none;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  background: radial-gradient(ellipse at center, #0a1628 0%, #000 100%);
-  opacity: 0;
-  transition: opacity 2s ease-in;
-}
-
+#win-screen { position: fixed; inset: 0; z-index: 900; display: none; flex-direction: column; align-items: center; justify-content: center; background: radial-gradient(ellipse at center, #0a1628 0%, #000 100%); opacity: 0; transition: opacity 2s ease-in; }
 #win-screen.active { display: flex; opacity: 1; }
-
-.win-title {
-  font-family: var(--font-display);
-  font-size: 48px;
-  font-weight: 900;
-  letter-spacing: 0.3em;
-  background: linear-gradient(135deg, var(--accent), var(--nucleus), var(--life));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  text-align: center;
-  margin-bottom: 20px;
-}
-
-.win-sub {
-  font-family: var(--font-display);
-  font-size: 11px;
-  letter-spacing: 0.2em;
-  color: var(--text2);
-  text-align: center;
-  margin-bottom: 30px;
-  line-height: 2;
-}
-
-.win-btn {
-  background: transparent;
-  border: 1px solid var(--accent);
-  color: var(--accent);
-  font-family: var(--font-display);
-  font-size: 12px;
-  letter-spacing: 0.2em;
-  padding: 12px 32px;
-  cursor: pointer;
-  border-radius: 2px;
-  transition: all 0.2s;
-}
-
-.win-btn:hover {
-  background: rgba(0,212,255,0.1);
-  box-shadow: 0 0 20px rgba(0,212,255,0.3);
-}
+.win-title { font-family: var(--font-display); font-size: 48px; font-weight: 900; letter-spacing: 0.3em; background: linear-gradient(135deg, var(--accent), var(--nucleus), var(--life)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; text-align: center; margin-bottom: 20px; }
+.win-sub { font-family: var(--font-display); font-size: 11px; letter-spacing: 0.2em; color: var(--text2); text-align: center; margin-bottom: 30px; line-height: 2; }
+.win-btn { background: transparent; border: 1px solid var(--accent); color: var(--accent); font-family: var(--font-display); font-size: 12px; letter-spacing: 0.2em; padding: 12px 32px; cursor: pointer; border-radius: 2px; transition: all 0.2s; margin: 10px; }
+.win-btn:hover { background: rgba(0,212,255,0.1); box-shadow: 0 0 20px rgba(0,212,255,0.3); }
 
 /* Tabs in center */
-#center-tabs {
-  display: flex;
-  gap: 4px;
-  width: 100%;
-  max-width: 520px;
-}
-
-.c-tab {
-  flex: 1;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  color: var(--text2);
-  font-family: var(--font-display);
-  font-size: 9px;
-  letter-spacing: 0.15em;
-  padding: 7px 4px;
-  cursor: pointer;
-  border-radius: 3px;
-  text-transform: uppercase;
-  transition: all 0.15s;
-  text-align: center;
-}
-
+#center-tabs { display: flex; gap: 4px; width: 100%; max-width: 520px; }
+.c-tab { flex: 1; background: var(--surface); border: 1px solid var(--border); color: var(--text2); font-family: var(--font-display); font-size: 9px; letter-spacing: 0.15em; padding: 7px 4px; cursor: pointer; border-radius: 3px; text-transform: uppercase; transition: all 0.15s; text-align: center; }
 .c-tab:hover { color: var(--text); }
-.c-tab.active {
-  background: rgba(0,212,255,0.1);
-  border-color: var(--border2);
-  color: var(--accent);
-}
-
+.c-tab.active { background: rgba(0,212,255,0.1); border-color: var(--border2); color: var(--accent); }
 #tab-content { width: 100%; max-width: 520px; }
-
 .tab-pane { display: none; }
 .tab-pane.active { display: block; }
-
-/* upgrades */
 .upgrade-grid { display: flex; flex-direction: column; gap: 6px; }
-
-.upg-btn {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  color: var(--text);
-  font-family: var(--font-body);
-  padding: 10px 12px;
-  cursor: pointer;
-  border-radius: 4px;
-  text-align: left;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  transition: all 0.15s;
-  width: 100%;
-}
-
+.upg-btn { background: var(--surface); border: 1px solid var(--border); color: var(--text); font-family: var(--font-body); padding: 10px 12px; cursor: pointer; border-radius: 4px; text-align: left; display: flex; justify-content: space-between; align-items: center; transition: all 0.15s; width: 100%; }
 .upg-btn:hover:not(:disabled) { border-color: var(--border2); }
 .upg-btn:disabled { opacity: 0.3; cursor: not-allowed; }
 .upg-btn.bought { border-color: rgba(127,255,107,0.3); color: var(--atom); opacity: 0.6; cursor: default; }
-
 .upg-info .upg-name { font-size: 13px; font-weight: 600; display: block; margin-bottom: 2px; }
 .upg-info .upg-desc { font-size: 11px; color: var(--text2); }
 .upg-cost { font-family: var(--font-display); font-size: 10px; color: var(--accent); white-space: nowrap; margin-left: 12px; }
-
-/* notification pulse */
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.4; }
-}
-
-.pulse { animation: pulse 1.5s infinite; }
-
 </style>
 </head>
 <body>
 
 <canvas id="bg-canvas"></canvas>
 
+<!-- BASE GAME UI -->
 <div id="app">
-  <!-- HEADER -->
   <header id="header">
     <div>
       <div id="logo">MATTER</div>
@@ -821,41 +376,29 @@ html, body {
     </div>
   </header>
 
-  <!-- LEFT: RESOURCES -->
   <div id="left-panel">
     <div class="panel-label">Resources</div>
     <div id="res-list"></div>
   </div>
 
-  <!-- CENTER -->
   <div id="center-panel">
-    <!-- Click zone -->
     <div id="click-zone" onclick="handleClick(event)">
       <div id="click-core">
         <svg id="core-svg" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
-          <!-- outer glow ring -->
           <circle cx="100" cy="100" r="90" fill="none" stroke="rgba(0,212,255,0.06)" stroke-width="1"/>
           <circle cx="100" cy="100" r="75" fill="none" stroke="rgba(0,212,255,0.1)" stroke-width="1"/>
-          <!-- core -->
           <circle id="core-circle" cx="100" cy="100" r="40" fill="rgba(0,212,255,0.08)" stroke="rgba(0,212,255,0.5)" stroke-width="1.5"/>
           <circle id="core-inner" cx="100" cy="100" r="22" fill="rgba(0,212,255,0.15)"/>
           <circle id="core-nucleus" cx="100" cy="100" r="8" fill="var(--accent)" opacity="0.9"/>
-          <!-- particles (animated via JS) -->
           <g id="svg-particles"></g>
         </svg>
       </div>
-      <!-- orbit rings -->
-      <div class="orbit-ring" style="inset:20px;animation-duration:4s">
-        <div class="orbit-particle" style="color:var(--quark);background:var(--quark)"></div>
-      </div>
-      <div class="orbit-ring" style="inset:5px;animation-duration:7s;animation-direction:reverse">
-        <div class="orbit-particle" style="color:var(--electron);background:var(--electron)"></div>
-      </div>
+      <div class="orbit-ring" style="inset:20px;animation-duration:4s"><div class="orbit-particle" style="color:var(--quark);background:var(--quark)"></div></div>
+      <div class="orbit-ring" style="inset:5px;animation-duration:7s;animation-direction:reverse"><div class="orbit-particle" style="color:var(--electron);background:var(--electron)"></div></div>
       <div id="click-label">CLICK TO SYNTHESIZE</div>
       <div id="click-reward">+1 Quark per click</div>
     </div>
 
-    <!-- Era progress -->
     <div style="height:50px"></div>
     <div id="era-bar-wrap">
       <div class="era-bar-top">
@@ -867,37 +410,57 @@ html, body {
       </div>
     </div>
 
-    <!-- Tabs -->
     <div id="center-tabs">
       <button class="c-tab active" onclick="setTab('synth')">Synthesize</button>
       <button class="c-tab" onclick="setTab('upgrades')">Upgrades</button>
       <button class="c-tab" onclick="setTab('research')">Research</button>
     </div>
 
-    <!-- Tab content -->
     <div id="tab-content">
-      <div id="tab-synth" class="tab-pane active">
-        <div id="synthesis-grid"></div>
-      </div>
-      <div id="tab-upgrades" class="tab-pane">
-        <div class="upgrade-grid" id="upgrades-list"></div>
-      </div>
-      <div id="tab-research" class="tab-pane">
-        <div class="upgrade-grid" id="research-list"></div>
-      </div>
+      <div id="tab-synth" class="tab-pane active"><div id="synthesis-grid"></div></div>
+      <div id="tab-upgrades" class="tab-pane"><div class="upgrade-grid" id="upgrades-list"></div></div>
+      <div id="tab-research" class="tab-pane"><div class="upgrade-grid" id="research-list"></div></div>
     </div>
 
-    <!-- Log -->
     <div id="log-panel">
       <div class="panel-label" style="margin-bottom:6px">Event Log</div>
       <div id="log-scroll"></div>
     </div>
   </div>
 
-  <!-- RIGHT: AUTOMATORS -->
   <div id="right-panel">
     <div class="panel-label">Automators</div>
     <div id="automators-list"></div>
+  </div>
+</div>
+
+<!-- CIV GAME UI (HIDDEN BY DEFAULT) -->
+<div id="civ-app">
+  <canvas id="civ-canvas"></canvas>
+  <header id="civ-header">
+    <h1>THE COSMIC VOYAGE</h1>
+    <div style="display:flex; gap: 15px;">
+      <div>YEAR: <span id="civ-year" style="color:var(--accent); font-family:var(--font-display);">0</span></div>
+      <button class="header-btn" onclick="enterCode()">CODE</button>
+    </div>
+  </header>
+  <div id="civ-god-powers">
+    <div class="panel-label">DIVINE INTERVENTION</div>
+    <button class="god-btn" onclick="civSpawn()">🌱 Seed New Civilization</button>
+    <button class="god-btn" onclick="civBless()">✨ Divine Blessing (+Tech/Pop)</button>
+    <button class="god-btn" onclick="civDisaster()">☄️ Natural Disaster (-Pop)</button>
+    <button class="god-btn" onclick="civForceWar()">⚔️ Sow Discord (Force War)</button>
+    <button class="god-btn" onclick="civSpaceProgram()">🚀 Inspire Space Flight</button>
+  </div>
+  <div id="civ-main">
+    <!-- Visuals drawn on civ-canvas -->
+  </div>
+  <div id="civ-stats">
+    <div class="panel-label">KNOWN CIVILIZATIONS</div>
+    <div id="civ-list-container"></div>
+  </div>
+  <div id="civ-log">
+    <!-- History logs here -->
   </div>
 </div>
 
@@ -905,6 +468,7 @@ html, body {
 <div id="era-transition">
   <div id="era-transition-text"></div>
   <div id="era-transition-sub"></div>
+  <button id="era-transition-btn" style="display:none;" onclick="closeEraTransition()">PROCEED</button>
 </div>
 
 <!-- CINEMATIC OVERLAY -->
@@ -917,54 +481,23 @@ html, body {
 <div id="credits-screen">
   <div id="credits-container" class="credits-container">
     <h1>MATTER</h1>
-    
-    <div class="role">Producer</div>
-    <p>Zane</p>
-    
-    <div class="role">Developer</div>
-    <p>Zane</p>
-    
-    <div class="role">Idea</div>
-    <p>Zane</p>
-    
-    <div class="role">Coder</div>
-    <p>Claude Opus 4.6, Gemini 3.1 Pro</p>
-    
-    <div class="role">Front End Developer</div>
-    <p>Claude, Gemini</p>
-    
-    <div class="role">Carrier</div>
-    <p>Claude</p>
-
-    <div class="role">W Assist</div>
-    <p>Gemini</p>
-
-    <div class="role">Most Patience</div>
-    <p>Gemini</p>
-
-    <div class="role">Syntax Error Architect</div>
-    <p>Zane</p>
-
-    <div class="role">Stack Overflow Copypaster</div>
-    <p>Claude</p>
-
-    <div class="role">Hallucination Manager</div>
-    <p>Gemini</p>
-
-    <div class="role">Chief Prompt Engineer</div>
-    <p>Zane</p>
-
-    <div class="role">Bug Generator</div>
-    <p>Zane</p>
-
-    <div class="role">Unpaid Debugger</div>
-    <p>Claude</p>
-
-    <div class="role">The GOAT</div>
-    <p>Claude</p>
-
-    <div class="role">Strongest Vibe Coder of Today</div>
-    <p>Zane</p>
+    <div class="role">Stage Design</div><p>Zane</p>
+    <div class="role">Idea</div><p>Zane</p>
+    <div class="role">Producer</div><p>Zane</p>
+    <div class="role">Developer</div><p>Zane</p>
+    <div class="role">Coder</div><p>Claude Opus 4.6, Gemini 3.1 Pro</p>
+    <div class="role">Front End Developer</div><p>Claude, Gemini</p>
+    <div class="role">Carrier</div><p>Claude</p>
+    <div class="role">W Assist</div><p>Gemini</p>
+    <div class="role">Most Patience</div><p>Gemini</p>
+    <div class="role">Syntax Error Architect</div><p>Zane</p>
+    <div class="role">Stack Overflow Copypaster</div><p>Claude</p>
+    <div class="role">Hallucination Manager</div><p>Gemini</p>
+    <div class="role">Chief Prompt Engineer</div><p>Zane</p>
+    <div class="role">Bug Generator</div><p>Zane</p>
+    <div class="role">Unpaid Debugger</div><p>Claude</p>
+    <div class="role">The GOAT</div><p>Claude</p>
+    <div class="role">Strongest Vibe Coder of Today</div><p>Zane</p>
   </div>
 </div>
 
@@ -972,7 +505,10 @@ html, body {
 <div id="win-screen">
   <div class="win-title">THE COSMOS AWAKENS</div>
   <div class="win-sub" id="win-stats"></div>
-  <button class="win-btn" onclick="resetGame()">↺ BEGIN AGAIN</button>
+  <div style="display:flex; gap:20px;">
+    <button class="win-btn" onclick="resetGame()">↺ BEGIN AGAIN</button>
+    <button class="win-btn" id="btn-voyage" style="border-color:var(--life); color:var(--life);" onclick="startCivGame()">🚀 BEGIN VOYAGE</button>
+  </div>
 </div>
 
 <script>
@@ -993,15 +529,7 @@ window.addEventListener('resize', resizeCanvas);
 function initParticles() {
   particles = [];
   for (let i = 0; i < 120; i++) {
-    particles.push({
-      x: Math.random() * canvas.width,
-      y: Math.random() * canvas.height,
-      r: Math.random() * 1.5 + 0.3,
-      vx: (Math.random() - 0.5) * 0.3,
-      vy: (Math.random() - 0.5) * 0.3,
-      alpha: Math.random() * 0.5 + 0.1,
-      color: ['#00d4ff','#c77dff','#7fff6b','#ff6b35'][Math.floor(Math.random()*4)]
-    });
+    particles.push({ x: Math.random() * canvas.width, y: Math.random() * canvas.height, r: Math.random() * 1.5 + 0.3, vx: (Math.random() - 0.5) * 0.3, vy: (Math.random() - 0.5) * 0.3, alpha: Math.random() * 0.5 + 0.1, color: ['#00d4ff','#c77dff','#7fff6b','#ff6b35'][Math.floor(Math.random()*4)] });
   }
 }
 initParticles();
@@ -1010,306 +538,132 @@ function drawParticles() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   particles.forEach(p => {
     p.x += p.vx; p.y += p.vy;
-    if (p.x < 0) p.x = canvas.width;
-    if (p.x > canvas.width) p.x = 0;
-    if (p.y < 0) p.y = canvas.height;
-    if (p.y > canvas.height) p.y = 0;
-    ctx.beginPath();
-    ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-    ctx.fillStyle = p.color;
-    ctx.globalAlpha = p.alpha;
-    ctx.fill();
-    ctx.globalAlpha = 1;
+    if (p.x < 0) p.x = canvas.width; if (p.x > canvas.width) p.x = 0;
+    if (p.y < 0) p.y = canvas.height; if (p.y > canvas.height) p.y = 0;
+    ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+    ctx.fillStyle = p.color; ctx.globalAlpha = p.alpha; ctx.fill(); ctx.globalAlpha = 1;
   });
-
-  // draw faint connections
-  ctx.globalAlpha = 0.03;
-  ctx.strokeStyle = '#00d4ff';
-  ctx.lineWidth = 0.5;
+  ctx.globalAlpha = 0.03; ctx.strokeStyle = '#00d4ff'; ctx.lineWidth = 0.5;
   for (let i = 0; i < particles.length; i++) {
     for (let j = i + 1; j < particles.length; j++) {
-      const dx = particles[i].x - particles[j].x;
-      const dy = particles[i].y - particles[j].y;
+      const dx = particles[i].x - particles[j].x; const dy = particles[i].y - particles[j].y;
       const dist = Math.sqrt(dx*dx + dy*dy);
-      if (dist < 100) {
-        ctx.globalAlpha = 0.04 * (1 - dist/100);
-        ctx.beginPath();
-        ctx.moveTo(particles[i].x, particles[i].y);
-        ctx.lineTo(particles[j].x, particles[j].y);
-        ctx.stroke();
-      }
+      if (dist < 100) { ctx.globalAlpha = 0.04 * (1 - dist/100); ctx.beginPath(); ctx.moveTo(particles[i].x, particles[i].y); ctx.lineTo(particles[j].x, particles[j].y); ctx.stroke(); }
     }
   }
-  ctx.globalAlpha = 1;
-  requestAnimationFrame(drawParticles);
+  ctx.globalAlpha = 1; requestAnimationFrame(drawParticles);
 }
 drawParticles();
 
 // ========================================
 // GAME DATA
 // ========================================
-
 const ERAS = [
-  { id: 'quark',     name: 'The Quark Epoch',          color: '#ff6b35', unlock: 0,        threshold: 1000,       clickResource: 'quark',    clickAmt: () => 1 * G.mult.click },
-  { id: 'hadron',    name: 'The Hadron Era',            color: '#ff3d71', unlock: 1000,     threshold: 8000,       clickResource: 'proton',   clickAmt: () => 1 * G.mult.click },
-  { id: 'lepton',    name: 'The Lepton Epoch',          color: '#4a9eff', unlock: 8000,     threshold: 40000,      clickResource: 'electron', clickAmt: () => 2 * G.mult.click },
-  { id: 'nucleon',   name: 'Nucleosynthesis',           color: '#c77dff', unlock: 40000,    threshold: 200000,     clickResource: 'nucleus',  clickAmt: () => 3 * G.mult.click },
-  { id: 'atom',      name: 'The Atomic Age',            color: '#7fff6b', unlock: 200000,   threshold: 1000000,    clickResource: 'hydrogen', clickAmt: () => 5 * G.mult.click },
-  { id: 'molecule',  name: 'Molecular Assembly',        color: '#ffe135', unlock: 1000000,  threshold: 6000000,    clickResource: 'h2o',      clickAmt: () => 8 * G.mult.click },
-  { id: 'compound',  name: 'Compound Chemistry',        color: '#ff9f1c', unlock: 6000000,  threshold: 30000000,   clickResource: 'organic',  clickAmt: () => 15 * G.mult.click },
-  { id: 'material',  name: 'Material Synthesis',        color: '#2ec4b6', unlock: 30000000, threshold: 150000000,  clickResource: 'crystal',  clickAmt: () => 25 * G.mult.click },
-  { id: 'cell',      name: 'The Prebiotic Soup',        color: '#ff006e', unlock: 150000000,threshold: 800000000,  clickResource: 'amino',    clickAmt: () => 50 * G.mult.click },
-  { id: 'life',      name: 'Life Emerges',              color: '#ffffff', unlock: 800000000,threshold: Infinity,   clickResource: 'dna',      clickAmt: () => 100 * G.mult.click },
+  { id: 'quark',     name: 'The Quark Epoch',          color: '#ff6b35', unlock: 0,        threshold: 1000,       clickResource: 'quark',    clickAmt: () => 1 * G.mult.click, lore: "From pure energy, fundamental particles burst into existence." },
+  { id: 'hadron',    name: 'The Hadron Era',            color: '#ff3d71', unlock: 1000,     threshold: 8000,       clickResource: 'proton',   clickAmt: () => 1 * G.mult.click, lore: "Quarks bind together, forging the heavy building blocks of matter." },
+  { id: 'lepton',    name: 'The Lepton Epoch',          color: '#4a9eff', unlock: 8000,     threshold: 40000,      clickResource: 'electron', clickAmt: () => 2 * G.mult.click, lore: "Light particles swarm the expanding cosmic soup." },
+  { id: 'nucleon',   name: 'Nucleosynthesis',           color: '#c77dff', unlock: 40000,    threshold: 200000,     clickResource: 'nucleus',  clickAmt: () => 3 * G.mult.click, lore: "Protons and neutrons fuse. The first atomic cores are born." },
+  { id: 'atom',      name: 'The Atomic Age',            color: '#7fff6b', unlock: 200000,   threshold: 1000000,    clickResource: 'hydrogen', clickAmt: () => 5 * G.mult.click, lore: "Electrons are captured. The universe becomes transparent." },
+  { id: 'molecule',  name: 'Molecular Assembly',        color: '#ffe135', unlock: 1000000,  threshold: 6000000,    clickResource: 'h2o',      clickAmt: () => 8 * G.mult.click, lore: "Atoms share electrons, creating the vast variety of chemistry." },
+  { id: 'compound',  name: 'Compound Chemistry',        color: '#ff9f1c', unlock: 6000000,  threshold: 30000000,   clickResource: 'organic',  clickAmt: () => 15 * G.mult.click, lore: "Complex carbon structures form in the stellar nurseries." },
+  { id: 'material',  name: 'Material Synthesis',        color: '#2ec4b6', unlock: 30000000, threshold: 150000000,  clickResource: 'crystal',  clickAmt: () => 25 * G.mult.click, lore: "Dust and rock clump together. Worlds begin to take shape." },
+  { id: 'cell',      name: 'The Prebiotic Soup',        color: '#ff006e', unlock: 150000000,threshold: 800000000,  clickResource: 'amino',    clickAmt: () => 50 * G.mult.click, lore: "In the warm waters of new worlds, organics fold and replicate." },
+  { id: 'life',      name: 'Life Emerges',              color: '#ffffff', unlock: 800000000,threshold: Infinity,   clickResource: 'dna',      clickAmt: () => 100 * G.mult.click, lore: "A self-sustaining spark. The universe wakes up to observe itself." },
 ];
 
 const RESOURCES = [
-  // Quark era
-  { id: 'quark',    name: 'Quarks',          color: '#ff6b35', era: 0 },
-  // Hadron era
-  { id: 'proton',   name: 'Protons',         color: '#ff3d71', era: 1 },
-  { id: 'neutron',  name: 'Neutrons',        color: '#4a9eff', era: 1 },
-  // Lepton
-  { id: 'electron', name: 'Electrons',       color: '#00d4ff', era: 2 },
-  { id: 'photon',   name: 'Photons',         color: '#fffbe6', era: 2 },
-  // Nucleon
-  { id: 'nucleus',  name: 'Nuclei',          color: '#c77dff', era: 3 },
-  { id: 'deuterium',name: 'Deuterium',       color: '#9d60ff', era: 3 },
-  { id: 'helium4',  name: 'Helium-4 Nuclei', color: '#b088ff', era: 3 },
-  // Atom
-  { id: 'hydrogen', name: 'Hydrogen (H)',    color: '#7fff6b', era: 4 },
-  { id: 'helium',   name: 'Helium (He)',     color: '#9dff8a', era: 4 },
-  { id: 'lithium',  name: 'Lithium (Li)',    color: '#b5ffa6', era: 4 },
-  { id: 'carbon',   name: 'Carbon (C)',      color: '#c8ffc0', era: 4 },
-  { id: 'oxygen',   name: 'Oxygen (O)',      color: '#ddffda', era: 4 },
-  { id: 'nitrogen', name: 'Nitrogen (N)',    color: '#f0fff0', era: 4 },
-  // Molecule
-  { id: 'h2',       name: 'H₂ (Hydrogen Gas)',  color: '#ffe135', era: 5 },
-  { id: 'h2o',      name: 'H₂O (Water)',         color: '#80e8ff', era: 5 },
-  { id: 'co2',      name: 'CO₂',                color: '#ffca80', era: 5 },
-  { id: 'nh3',      name: 'NH₃ (Ammonia)',       color: '#d4ff80', era: 5 },
-  { id: 'ch4',      name: 'CH₄ (Methane)',       color: '#ffb380', era: 5 },
-  // Compound
-  { id: 'organic',  name: 'Organic Molecules',  color: '#ff9f1c', era: 6 },
-  { id: 'lipid',    name: 'Lipids',             color: '#ffb84d', era: 6 },
-  { id: 'sugar',    name: 'Sugars',             color: '#ffd180', era: 6 },
-  { id: 'phosphate',name: 'Phosphates',         color: '#ff8c00', era: 6 },
-  // Material
-  { id: 'crystal',  name: 'Mineral Crystals',   color: '#2ec4b6', era: 7 },
-  { id: 'silicate', name: 'Silicates',          color: '#4be0d8', era: 7 },
-  { id: 'iron',     name: 'Iron Oxide',         color: '#ff7b54', era: 7 },
-  { id: 'calcite',  name: 'Calcite',            color: '#9ffffc', era: 7 },
-  // Cell
-  { id: 'amino',    name: 'Amino Acids',        color: '#ff006e', era: 8 },
-  { id: 'nucleotide',name:'Nucleotides',        color: '#ff4da6', era: 8 },
-  { id: 'peptide',  name: 'Peptide Chains',     color: '#ff80c0', era: 8 },
-  { id: 'membrane', name: 'Lipid Membranes',    color: '#ffb3da', era: 8 },
-  // Life
-  { id: 'dna',      name: 'DNA Strands',        color: '#ffffff', era: 9 },
-  { id: 'rna',      name: 'RNA Molecules',      color: '#e0e0ff', era: 9 },
-  { id: 'protein',  name: 'Proteins',           color: '#c0c0ff', era: 9 },
-  { id: 'cell_unit',name: 'Protocells',         color: '#a0a0ff', era: 9 },
+  { id: 'quark', name: 'Quarks', color: '#ff6b35', era: 0 }, { id: 'proton', name: 'Protons', color: '#ff3d71', era: 1 }, { id: 'neutron', name: 'Neutrons', color: '#4a9eff', era: 1 },
+  { id: 'electron', name: 'Electrons', color: '#00d4ff', era: 2 }, { id: 'photon', name: 'Photons', color: '#fffbe6', era: 2 },
+  { id: 'nucleus', name: 'Nuclei', color: '#c77dff', era: 3 }, { id: 'deuterium', name: 'Deuterium', color: '#9d60ff', era: 3 }, { id: 'helium4', name: 'Helium-4', color: '#b088ff', era: 3 },
+  { id: 'hydrogen', name: 'Hydrogen (H)', color: '#7fff6b', era: 4 }, { id: 'helium', name: 'Helium (He)', color: '#9dff8a', era: 4 }, { id: 'lithium', name: 'Lithium (Li)', color: '#b5ffa6', era: 4 }, { id: 'carbon', name: 'Carbon (C)', color: '#c8ffc0', era: 4 }, { id: 'oxygen', name: 'Oxygen (O)', color: '#ddffda', era: 4 }, { id: 'nitrogen', name: 'Nitrogen (N)', color: '#f0fff0', era: 4 },
+  { id: 'h2', name: 'H₂ (Gas)', color: '#ffe135', era: 5 }, { id: 'h2o', name: 'H₂O (Water)', color: '#80e8ff', era: 5 }, { id: 'co2', name: 'CO₂', color: '#ffca80', era: 5 }, { id: 'nh3', name: 'NH₃ (Ammonia)', color: '#d4ff80', era: 5 }, { id: 'ch4', name: 'CH₄ (Methane)', color: '#ffb380', era: 5 },
+  { id: 'organic', name: 'Organic Molecules', color: '#ff9f1c', era: 6 }, { id: 'lipid', name: 'Lipids', color: '#ffb84d', era: 6 }, { id: 'sugar', name: 'Sugars', color: '#ffd180', era: 6 }, { id: 'phosphate', name: 'Phosphates', color: '#ff8c00', era: 6 },
+  { id: 'crystal', name: 'Mineral Crystals', color: '#2ec4b6', era: 7 }, { id: 'silicate', name: 'Silicates', color: '#4be0d8', era: 7 }, { id: 'iron', name: 'Iron Oxide', color: '#ff7b54', era: 7 }, { id: 'calcite', name: 'Calcite', color: '#9ffffc', era: 7 },
+  { id: 'amino', name: 'Amino Acids', color: '#ff006e', era: 8 }, { id: 'nucleotide', name: 'Nucleotides', color: '#ff4da6', era: 8 }, { id: 'peptide', name: 'Peptide Chains', color: '#ff80c0', era: 8 }, { id: 'membrane', name: 'Lipid Membranes', color: '#ffb3da', era: 8 },
+  { id: 'dna', name: 'DNA Strands', color: '#ffffff', era: 9 }, { id: 'rna', name: 'RNA Molecules', color: '#e0e0ff', era: 9 }, { id: 'protein', name: 'Proteins', color: '#c0c0ff', era: 9 }, { id: 'cell_unit', name: 'Protocells', color: '#a0a0ff', era: 9 },
 ];
 
 const SYNTH_RECIPES = [
-  // ERA 0 → 1: quarks → hadrons
-  { id: 'make_proton',   era: 0, name: 'Fuse Proton',    recipe: { quark: 3 }, yield: { proton: 1 },    yieldStr: '+1 Proton' },
-  { id: 'make_neutron',  era: 0, name: 'Fuse Neutron',   recipe: { quark: 3 }, yield: { neutron: 1 },   yieldStr: '+1 Neutron' },
-  // ERA 1: hadrons
-  { id: 'make_electron', era: 1, name: 'Emit Electron',  recipe: { photon: 2, quark: 1 }, yield: { electron: 1 }, yieldStr: '+1 Electron', photonFree: true },
-  { id: 'make_photon',   era: 1, name: 'Release Photon', recipe: { quark: 1 }, yield: { photon: 2 },    yieldStr: '+2 Photons' },
-  // ERA 2: leptons → nuclei
-  { id: 'make_nucleus',  era: 2, name: 'Bind Nucleus',   recipe: { proton: 1, neutron: 1 }, yield: { nucleus: 1 }, yieldStr: '+1 Nucleus' },
-  { id: 'make_deut',     era: 2, name: 'Deuterium Fusion', recipe: { proton: 2, neutron: 2 }, yield: { deuterium: 1 }, yieldStr: '+1 Deuterium' },
-  // ERA 3: nuclei → atoms
-  { id: 'make_hydrogen', era: 3, name: 'Form Hydrogen',  recipe: { nucleus: 1, electron: 1 }, yield: { hydrogen: 1 }, yieldStr: '+1 H' },
-  { id: 'make_helium',   era: 3, name: 'Form Helium',    recipe: { helium4: 1, electron: 2 }, yield: { helium: 1 }, yieldStr: '+1 He' },
-  { id: 'make_helium4',  era: 3, name: 'Alpha Particle', recipe: { proton: 2, neutron: 2, nucleus: 2 }, yield: { helium4: 1 }, yieldStr: '+1 He-4' },
-  // ERA 4: atoms → molecules
-  { id: 'make_h2',       era: 4, name: 'Bind H₂',        recipe: { hydrogen: 2 },                      yield: { h2: 1 }, yieldStr: '+1 H₂' },
-  { id: 'make_h2o',      era: 4, name: 'Synthesize H₂O', recipe: { hydrogen: 2, oxygen: 1 },           yield: { h2o: 2 }, yieldStr: '+2 H₂O' },
-  { id: 'make_co2',      era: 4, name: 'Form CO₂',       recipe: { carbon: 1, oxygen: 2 },             yield: { co2: 1 }, yieldStr: '+1 CO₂' },
-  { id: 'make_nh3',      era: 4, name: 'Bind NH₃',       recipe: { nitrogen: 1, hydrogen: 3 },         yield: { nh3: 1 }, yieldStr: '+1 NH₃' },
-  { id: 'make_ch4',      era: 4, name: 'Form CH₄',       recipe: { carbon: 1, hydrogen: 4 },           yield: { ch4: 1 }, yieldStr: '+1 CH₄' },
-  // ERA 5: molecules → organics
-  { id: 'make_organic',  era: 5, name: 'Carbon Chain',   recipe: { co2: 2, h2o: 3, ch4: 1 },          yield: { organic: 1 }, yieldStr: '+1 Organic Mol.' },
-  { id: 'make_lipid',    era: 5, name: 'Lipid Assembly', recipe: { organic: 3, h2: 4 },                yield: { lipid: 1 }, yieldStr: '+1 Lipid' },
-  { id: 'make_sugar',    era: 5, name: 'Sugar Ring',     recipe: { organic: 2, h2o: 4, co2: 1 },      yield: { sugar: 2 }, yieldStr: '+2 Sugars' },
-  { id: 'make_phosph',   era: 5, name: 'Phosphate Bond', recipe: { organic: 2, h2o: 2 },              yield: { phosphate: 1 }, yieldStr: '+1 Phosphate' },
-  // ERA 6: organics → materials
-  { id: 'make_crystal',  era: 6, name: 'Crystal Lattice',recipe: { silicate: 3, calcite: 1 },         yield: { crystal: 1 }, yieldStr: '+1 Crystal' },
-  { id: 'make_silicate', era: 6, name: 'Silicate Form',  recipe: { organic: 4, h2o: 3 },              yield: { silicate: 2 }, yieldStr: '+2 Silicates' },
-  { id: 'make_iron',     era: 6, name: 'Iron Oxidation', recipe: { organic: 3, h2o: 4 },              yield: { iron: 1 }, yieldStr: '+1 Iron Oxide' },
-  { id: 'make_calcite',  era: 6, name: 'Calcite Deposit',recipe: { co2: 2, h2o: 2, calcium: 1 },     yield: { calcite: 1 }, yieldStr: '+1 Calcite', special: true },
-  // ERA 7: materials → prebiotic
-  { id: 'make_amino',    era: 7, name: 'Amino Acid',     recipe: { organic: 5, nh3: 2, h2o: 3 },     yield: { amino: 1 }, yieldStr: '+1 Amino Acid' },
-  { id: 'make_nucleot',  era: 7, name: 'Nucleotide',     recipe: { sugar: 3, phosphate: 2, nh3: 1 }, yield: { nucleotide: 1 }, yieldStr: '+1 Nucleotide' },
-  { id: 'make_peptide',  era: 7, name: 'Peptide Chain',  recipe: { amino: 4 },                        yield: { peptide: 1 }, yieldStr: '+1 Peptide' },
-  { id: 'make_membrane', era: 7, name: 'Lipid Membrane', recipe: { lipid: 5, h2o: 6 },               yield: { membrane: 1 }, yieldStr: '+1 Membrane' },
-  // ERA 8: prebiotic → life
-  { id: 'make_rna',      era: 8, name: 'RNA Molecule',   recipe: { nucleotide: 5, peptide: 2 },       yield: { rna: 1 }, yieldStr: '+1 RNA' },
-  { id: 'make_dna',      era: 8, name: 'DNA Strand',     recipe: { rna: 3, nucleotide: 8 },           yield: { dna: 1 }, yieldStr: '+1 DNA' },
-  { id: 'make_protein',  era: 8, name: 'Protein Fold',   recipe: { peptide: 6, rna: 1 },              yield: { protein: 1 }, yieldStr: '+1 Protein' },
-  { id: 'make_cell',     era: 8, name: 'Protocell',      recipe: { dna: 2, protein: 3, membrane: 3 }, yield: { cell_unit: 1 }, yieldStr: '+1 Protocell' },
+  { id: 'make_proton', era: 0, name: 'Fuse Proton', recipe: { quark: 3 }, yield: { proton: 1 }, yieldStr: '+1 Proton' }, { id: 'make_neutron', era: 0, name: 'Fuse Neutron', recipe: { quark: 3 }, yield: { neutron: 1 }, yieldStr: '+1 Neutron' },
+  { id: 'make_electron', era: 1, name: 'Emit Electron', recipe: { photon: 2, quark: 1 }, yield: { electron: 1 }, yieldStr: '+1 Electron' }, { id: 'make_photon', era: 1, name: 'Release Photon', recipe: { quark: 1 }, yield: { photon: 2 }, yieldStr: '+2 Photons' },
+  { id: 'make_nucleus', era: 2, name: 'Bind Nucleus', recipe: { proton: 1, neutron: 1 }, yield: { nucleus: 1 }, yieldStr: '+1 Nucleus' }, { id: 'make_deut', era: 2, name: 'Deuterium Fusion', recipe: { proton: 2, neutron: 2 }, yield: { deuterium: 1 }, yieldStr: '+1 Deuterium' },
+  { id: 'make_hydrogen', era: 3, name: 'Form Hydrogen', recipe: { nucleus: 1, electron: 1 }, yield: { hydrogen: 1 }, yieldStr: '+1 H' }, { id: 'make_helium', era: 3, name: 'Form Helium', recipe: { helium4: 1, electron: 2 }, yield: { helium: 1 }, yieldStr: '+1 He' }, { id: 'make_helium4', era: 3, name: 'Alpha Particle', recipe: { proton: 2, neutron: 2, nucleus: 2 }, yield: { helium4: 1 }, yieldStr: '+1 He-4' },
+  { id: 'make_h2', era: 4, name: 'Bind H₂', recipe: { hydrogen: 2 }, yield: { h2: 1 }, yieldStr: '+1 H₂' }, { id: 'make_h2o', era: 4, name: 'Synthesize H₂O', recipe: { hydrogen: 2, oxygen: 1 }, yield: { h2o: 2 }, yieldStr: '+2 H₂O' }, { id: 'make_co2', era: 4, name: 'Form CO₂', recipe: { carbon: 1, oxygen: 2 }, yield: { co2: 1 }, yieldStr: '+1 CO₂' }, { id: 'make_nh3', era: 4, name: 'Bind NH₃', recipe: { nitrogen: 1, hydrogen: 3 }, yield: { nh3: 1 }, yieldStr: '+1 NH₃' }, { id: 'make_ch4', era: 4, name: 'Form CH₄', recipe: { carbon: 1, hydrogen: 4 }, yield: { ch4: 1 }, yieldStr: '+1 CH₄' },
+  { id: 'make_organic', era: 5, name: 'Carbon Chain', recipe: { co2: 2, h2o: 3, ch4: 1 }, yield: { organic: 1 }, yieldStr: '+1 Organic Mol.' }, { id: 'make_lipid', era: 5, name: 'Lipid Assembly', recipe: { organic: 3, h2: 4 }, yield: { lipid: 1 }, yieldStr: '+1 Lipid' }, { id: 'make_sugar', era: 5, name: 'Sugar Ring', recipe: { organic: 2, h2o: 4, co2: 1 }, yield: { sugar: 2 }, yieldStr: '+2 Sugars' }, { id: 'make_phosph', era: 5, name: 'Phosphate Bond', recipe: { organic: 2, h2o: 2 }, yield: { phosphate: 1 }, yieldStr: '+1 Phosphate' },
+  { id: 'make_crystal', era: 6, name: 'Crystal Lattice', recipe: { silicate: 3, calcite: 1 }, yield: { crystal: 1 }, yieldStr: '+1 Crystal' }, { id: 'make_silicate', era: 6, name: 'Silicate Form', recipe: { organic: 4, h2o: 3 }, yield: { silicate: 2 }, yieldStr: '+2 Silicates' }, { id: 'make_iron', era: 6, name: 'Iron Oxidation', recipe: { organic: 3, h2o: 4 }, yield: { iron: 1 }, yieldStr: '+1 Iron Oxide' },
+  { id: 'make_amino', era: 7, name: 'Amino Acid', recipe: { organic: 5, nh3: 2, h2o: 3 }, yield: { amino: 1 }, yieldStr: '+1 Amino Acid' }, { id: 'make_nucleot', era: 7, name: 'Nucleotide', recipe: { sugar: 3, phosphate: 2, nh3: 1 }, yield: { nucleotide: 1 }, yieldStr: '+1 Nucleotide' }, { id: 'make_peptide', era: 7, name: 'Peptide Chain', recipe: { amino: 4 }, yield: { peptide: 1 }, yieldStr: '+1 Peptide' }, { id: 'make_membrane', era: 7, name: 'Lipid Membrane', recipe: { lipid: 5, h2o: 6 }, yield: { membrane: 1 }, yieldStr: '+1 Membrane' },
+  { id: 'make_rna', era: 8, name: 'RNA Molecule', recipe: { nucleotide: 5, peptide: 2 }, yield: { rna: 1 }, yieldStr: '+1 RNA' }, { id: 'make_dna', era: 8, name: 'DNA Strand', recipe: { rna: 3, nucleotide: 8 }, yield: { dna: 1 }, yieldStr: '+1 DNA' }, { id: 'make_protein', era: 8, name: 'Protein Fold', recipe: { peptide: 6, rna: 1 }, yield: { protein: 1 }, yieldStr: '+1 Protein' }, { id: 'make_cell', era: 8, name: 'Protocell', recipe: { dna: 2, protein: 3, membrane: 3 }, yield: { cell_unit: 1 }, yieldStr: '+1 Protocell' },
 ];
 
 const AUTOMATORS = [
-  // Quark era
-  { id: 'quark_osc',   era: 0, name: 'Quantum Oscillator',  desc: 'Produces quarks from vacuum energy', cost: { quark: 15 },       produces: { quark: 0.5 },     baseCost: { quark: 15 },       costMult: 1.15 },
-  { id: 'quark_field', era: 0, name: 'Quark Field Tap',     desc: 'Taps the quark field continuously',  cost: { quark: 120 },      produces: { quark: 3 },       baseCost: { quark: 120 },      costMult: 1.15 },
-  // Hadron era
-  { id: 'proton_gun',  era: 1, name: 'Proton Collider',     desc: 'Auto-fuses protons from quarks',     cost: { proton: 10 },      produces: { proton: 0.5 },    baseCost: { proton: 10 },      costMult: 1.15 },
-  { id: 'neutron_gen', era: 1, name: 'Neutron Generator',   desc: 'Generates neutrons passively',       cost: { neutron: 10 },     produces: { neutron: 0.5 },   baseCost: { neutron: 10 },     costMult: 1.15 },
-  { id: 'photon_emit', era: 1, name: 'Photon Emitter',      desc: 'Emits photons continuously',         cost: { proton: 50 },      produces: { photon: 2 },      baseCost: { proton: 50 },      costMult: 1.15 },
-  // Lepton
-  { id: 'e_trap',      era: 2, name: 'Electron Trap',       desc: 'Captures free electrons',            cost: { electron: 8 },     produces: { electron: 0.8 },  baseCost: { electron: 8 },     costMult: 1.15 },
-  // Nucleon
-  { id: 'nuc_forge',   era: 3, name: 'Nuclear Forge',       desc: 'Binds nuclei automatically',         cost: { nucleus: 5 },      produces: { nucleus: 0.3 },   baseCost: { nucleus: 5 },      costMult: 1.15 },
-  { id: 'deut_reactor',era: 3, name: 'Deuterium Reactor',   desc: 'Fuses deuterium continuously',       cost: { deuterium: 3 },    produces: { deuterium: 0.15 },baseCost: { deuterium: 3 },    costMult: 1.15 },
-  // Atom era
-  { id: 'h_cloud',     era: 4, name: 'Hydrogen Nebula',     desc: 'Slowly forms hydrogen atoms',        cost: { hydrogen: 20 },    produces: { hydrogen: 1 },    baseCost: { hydrogen: 20 },    costMult: 1.15 },
-  { id: 'stellar_nuc', era: 4, name: 'Stellar Furnace',     desc: 'Stellar nucleosynthesis engine',     cost: { hydrogen: 200 },   produces: { carbon: 0.5, oxygen: 0.5, hydrogen: 2 }, baseCost: { hydrogen: 200 }, costMult: 1.15 },
-  // Molecule
-  { id: 'mol_bond',    era: 5, name: 'Molecular Bonder',    desc: 'Auto-assembles water molecules',     cost: { h2o: 30 },         produces: { h2o: 1.5 },       baseCost: { h2o: 30 },         costMult: 1.15 },
-  { id: 'atmo_proc',   era: 5, name: 'Atmosphere Processor',desc: 'Cycles CO₂ and CH₄',                cost: { co2: 20 },         produces: { co2: 0.8, ch4: 0.5 },baseCost:{ co2: 20 },        costMult: 1.15 },
-  // Compound
-  { id: 'org_synth',   era: 6, name: 'Organic Synthesizer', desc: 'Miller-Urey style chemistry',        cost: { organic: 50 },     produces: { organic: 2, lipid: 0.3 }, baseCost: { organic: 50 }, costMult: 1.15 },
-  { id: 'hydro_vent',  era: 6, name: 'Hydrothermal Vent',   desc: 'Deep-sea chemistry engine',          cost: { organic: 300 },    produces: { organic: 8, amino: 0.1 }, baseCost: { organic: 300 },costMult: 1.15 },
-  // Material
-  { id: 'min_press',   era: 7, name: 'Mineral Press',       desc: 'Crystallizes minerals over time',    cost: { crystal: 40 },     produces: { crystal: 1.5, silicate: 0.8 }, baseCost: { crystal: 40 }, costMult: 1.15 },
-  { id: 'geol_cycle',  era: 7, name: 'Geological Cycle',    desc: 'Tectonic mineral cycling',           cost: { crystal: 250 },    produces: { crystal: 5, iron: 1, calcite: 1 }, baseCost: { crystal: 250 }, costMult: 1.15 },
-  // Cell
-  { id: 'tide_pool',   era: 8, name: 'Tidal Pool',          desc: 'Concentration of prebiotics',        cost: { amino: 30 },       produces: { amino: 1, nucleotide: 0.3 }, baseCost: { amino: 30 }, costMult: 1.15 },
-  { id: 'rna_world',   era: 8, name: 'RNA World Engine',    desc: 'Self-replicating RNA system',        cost: { rna: 10 },         produces: { rna: 0.5, nucleotide: 1 }, baseCost: { rna: 10 }, costMult: 1.15 },
-  // Life
-  { id: 'proto_div',   era: 9, name: 'Protocell Division',  desc: 'First cells divide and replicate',   cost: { cell_unit: 10 },   produces: { cell_unit: 0.4, protein: 0.5, dna: 0.2 }, baseCost: { cell_unit: 10 }, costMult: 1.15 },
-  { id: 'evol_press',  era: 9, name: 'Evolutionary Pressure',desc: 'Selection drives complexity',       cost: { cell_unit: 100 },  produces: { cell_unit: 2, protein: 2, dna: 1 }, baseCost: { cell_unit: 100 }, costMult: 1.15 },
+  { id: 'quark_osc', era: 0, name: 'Quantum Oscillator', desc: 'Produces quarks from vacuum', cost: { quark: 15 }, produces: { quark: 0.5 }, baseCost: { quark: 15 }, costMult: 1.15 }, { id: 'quark_field', era: 0, name: 'Quark Field Tap', desc: 'Taps quark field', cost: { quark: 120 }, produces: { quark: 3 }, baseCost: { quark: 120 }, costMult: 1.15 },
+  { id: 'proton_gun', era: 1, name: 'Proton Collider', desc: 'Auto-fuses protons', cost: { proton: 10 }, produces: { proton: 0.5 }, baseCost: { proton: 10 }, costMult: 1.15 }, { id: 'neutron_gen', era: 1, name: 'Neutron Generator', desc: 'Generates neutrons', cost: { neutron: 10 }, produces: { neutron: 0.5 }, baseCost: { neutron: 10 }, costMult: 1.15 }, { id: 'photon_emit', era: 1, name: 'Photon Emitter', desc: 'Emits photons', cost: { proton: 50 }, produces: { photon: 2 }, baseCost: { proton: 50 }, costMult: 1.15 },
+  { id: 'e_trap', era: 2, name: 'Electron Trap', desc: 'Captures electrons', cost: { electron: 8 }, produces: { electron: 0.8 }, baseCost: { electron: 8 }, costMult: 1.15 },
+  { id: 'nuc_forge', era: 3, name: 'Nuclear Forge', desc: 'Binds nuclei', cost: { nucleus: 5 }, produces: { nucleus: 0.3 }, baseCost: { nucleus: 5 }, costMult: 1.15 }, { id: 'deut_reactor', era: 3, name: 'Deuterium Reactor', desc: 'Fuses deuterium', cost: { deuterium: 3 }, produces: { deuterium: 0.15 }, baseCost: { deuterium: 3 }, costMult: 1.15 },
+  { id: 'h_cloud', era: 4, name: 'Hydrogen Nebula', desc: 'Forms hydrogen atoms', cost: { hydrogen: 20 }, produces: { hydrogen: 1 }, baseCost: { hydrogen: 20 }, costMult: 1.15 }, { id: 'stellar_nuc', era: 4, name: 'Stellar Furnace', desc: 'Stellar nucleosynthesis', cost: { hydrogen: 200 }, produces: { carbon: 0.5, oxygen: 0.5, hydrogen: 2 }, baseCost: { hydrogen: 200 }, costMult: 1.15 },
+  { id: 'mol_bond', era: 5, name: 'Molecular Bonder', desc: 'Assembles water', cost: { h2o: 30 }, produces: { h2o: 1.5 }, baseCost: { h2o: 30 }, costMult: 1.15 }, { id: 'atmo_proc', era: 5, name: 'Atmosphere Processor', desc: 'Cycles CO₂ and CH₄', cost: { co2: 20 }, produces: { co2: 0.8, ch4: 0.5 }, baseCost:{ co2: 20 }, costMult: 1.15 },
+  { id: 'org_synth', era: 6, name: 'Organic Synthesizer', desc: 'Miller-Urey chemistry', cost: { organic: 50 }, produces: { organic: 2, lipid: 0.3 }, baseCost: { organic: 50 }, costMult: 1.15 }, { id: 'hydro_vent', era: 6, name: 'Hydrothermal Vent', desc: 'Deep-sea chemistry', cost: { organic: 300 }, produces: { organic: 8, amino: 0.1 }, baseCost: { organic: 300 }, costMult: 1.15 },
+  { id: 'min_press', era: 7, name: 'Mineral Press', desc: 'Crystallizes minerals', cost: { crystal: 40 }, produces: { crystal: 1.5, silicate: 0.8 }, baseCost: { crystal: 40 }, costMult: 1.15 }, { id: 'geol_cycle', era: 7, name: 'Geological Cycle', desc: 'Tectonic mineral cycling', cost: { crystal: 250 }, produces: { crystal: 5, iron: 1, calcite: 1 }, baseCost: { crystal: 250 }, costMult: 1.15 },
+  { id: 'tide_pool', era: 8, name: 'Tidal Pool', desc: 'Concentrates prebiotics', cost: { amino: 30 }, produces: { amino: 1, nucleotide: 0.3 }, baseCost: { amino: 30 }, costMult: 1.15 }, { id: 'rna_world', era: 8, name: 'RNA World Engine', desc: 'Self-replicating RNA', cost: { rna: 10 }, produces: { rna: 0.5, nucleotide: 1 }, baseCost: { rna: 10 }, costMult: 1.15 },
+  { id: 'proto_div', era: 9, name: 'Protocell Division', desc: 'Cells divide & replicate', cost: { cell_unit: 10 }, produces: { cell_unit: 0.4, protein: 0.5, dna: 0.2 }, baseCost: { cell_unit: 10 }, costMult: 1.15 }, { id: 'evol_press', era: 9, name: 'Evolutionary Pressure', desc: 'Selection drives complexity', cost: { cell_unit: 100 }, produces: { cell_unit: 2, protein: 2, dna: 1 }, baseCost: { cell_unit: 100 }, costMult: 1.15 },
 ];
 
 const UPGRADES = [
-  { id: 'u_click1',  era: 0, name: 'Quark Resonance',      desc: '+2 per click',          cost: { quark: 80 },       apply: () => G.mult.click += 1 },
-  { id: 'u_click2',  era: 1, name: 'Hadron Boost',         desc: 'Click yield ×2',        cost: { proton: 50 },      apply: () => G.mult.click *= 2 },
-  { id: 'u_auto1',   era: 1, name: 'Quantum Coherence',    desc: 'Auto production ×1.5',  cost: { proton: 200 },     apply: () => G.mult.auto *= 1.5 },
-  { id: 'u_click3',  era: 2, name: 'Electron Cascade',     desc: 'Click yield ×2',        cost: { electron: 100 },   apply: () => G.mult.click *= 2 },
-  { id: 'u_auto2',   era: 2, name: 'Lepton Flux',          desc: 'Auto production ×1.5',  cost: { electron: 400 },   apply: () => G.mult.auto *= 1.5 },
-  { id: 'u_click4',  era: 3, name: 'Nuclear Force',        desc: 'Click yield ×3',        cost: { nucleus: 50 },     apply: () => G.mult.click *= 3 },
-  { id: 'u_auto3',   era: 3, name: 'Fusion Efficiency',    desc: 'Auto production ×2',    cost: { nucleus: 200 },    apply: () => G.mult.auto *= 2 },
-  { id: 'u_click5',  era: 4, name: 'Atomic Resonance',     desc: 'Click yield ×3',        cost: { hydrogen: 300 },   apply: () => G.mult.click *= 3 },
-  { id: 'u_synth1',  era: 4, name: 'Valence Optimization', desc: 'Synth costs ×0.8',      cost: { hydrogen: 500 },   apply: () => G.mult.synthCost *= 0.8 },
-  { id: 'u_auto4',   era: 4, name: 'Stellar Evolution',    desc: 'Auto production ×2',    cost: { carbon: 200 },     apply: () => G.mult.auto *= 2 },
-  { id: 'u_click6',  era: 5, name: 'Molecular Harmonics',  desc: 'Click yield ×4',        cost: { h2o: 500 },        apply: () => G.mult.click *= 4 },
-  { id: 'u_auto5',   era: 5, name: 'Reaction Catalysis',   desc: 'Auto production ×2',    cost: { h2o: 2000 },       apply: () => G.mult.auto *= 2 },
-  { id: 'u_click7',  era: 6, name: 'Organic Chemistry',    desc: 'Click yield ×5',        cost: { organic: 1000 },   apply: () => G.mult.click *= 5 },
-  { id: 'u_auto6',   era: 6, name: 'Entropy Reversal',     desc: 'Auto production ×2',    cost: { organic: 5000 },   apply: () => G.mult.auto *= 2 },
-  { id: 'u_click8',  era: 7, name: 'Geological Memory',    desc: 'Click yield ×5',        cost: { crystal: 500 },    apply: () => G.mult.click *= 5 },
-  { id: 'u_auto7',   era: 7, name: 'Deep Time Compression',desc: 'Auto production ×3',    cost: { crystal: 3000 },   apply: () => G.mult.auto *= 3 },
-  { id: 'u_click9',  era: 8, name: 'Prebiotic Momentum',   desc: 'Click yield ×8',        cost: { amino: 500 },      apply: () => G.mult.click *= 8 },
-  { id: 'u_auto8',   era: 8, name: 'RNA World Emergence',  desc: 'Auto production ×3',    cost: { amino: 3000 },     apply: () => G.mult.auto *= 3 },
-  { id: 'u_click10', era: 9, name: 'First Breath',         desc: 'Click yield ×10',       cost: { dna: 100 },        apply: () => G.mult.click *= 10 },
-  { id: 'u_auto9',   era: 9, name: 'Natural Selection',    desc: 'Auto production ×4',    cost: { protein: 200 },    apply: () => G.mult.auto *= 4 },
+  { id: 'u_click1', era: 0, name: 'Quark Resonance', desc: '+2 per click', cost: { quark: 80 }, apply: () => G.mult.click += 1 }, { id: 'u_click2', era: 1, name: 'Hadron Boost', desc: 'Click yield ×2', cost: { proton: 50 }, apply: () => G.mult.click *= 2 }, { id: 'u_auto1', era: 1, name: 'Quantum Coherence', desc: 'Auto production ×1.5', cost: { proton: 200 }, apply: () => G.mult.auto *= 1.5 }, { id: 'u_click3', era: 2, name: 'Electron Cascade', desc: 'Click yield ×2', cost: { electron: 100 }, apply: () => G.mult.click *= 2 }, { id: 'u_auto2', era: 2, name: 'Lepton Flux', desc: 'Auto production ×1.5', cost: { electron: 400 }, apply: () => G.mult.auto *= 1.5 }, { id: 'u_click4', era: 3, name: 'Nuclear Force', desc: 'Click yield ×3', cost: { nucleus: 50 }, apply: () => G.mult.click *= 3 }, { id: 'u_auto3', era: 3, name: 'Fusion Efficiency', desc: 'Auto production ×2', cost: { nucleus: 200 }, apply: () => G.mult.auto *= 2 }, { id: 'u_click5', era: 4, name: 'Atomic Resonance', desc: 'Click yield ×3', cost: { hydrogen: 300 }, apply: () => G.mult.click *= 3 }, { id: 'u_synth1', era: 4, name: 'Valence Optimization', desc: 'Synth costs ×0.8', cost: { hydrogen: 500 }, apply: () => G.mult.synthCost *= 0.8 }, { id: 'u_auto4', era: 4, name: 'Stellar Evolution', desc: 'Auto production ×2', cost: { carbon: 200 }, apply: () => G.mult.auto *= 2 }, { id: 'u_click6', era: 5, name: 'Molecular Harmonics', desc: 'Click yield ×4', cost: { h2o: 500 }, apply: () => G.mult.click *= 4 }, { id: 'u_auto5', era: 5, name: 'Reaction Catalysis', desc: 'Auto production ×2', cost: { h2o: 2000 }, apply: () => G.mult.auto *= 2 }, { id: 'u_click7', era: 6, name: 'Organic Chemistry', desc: 'Click yield ×5', cost: { organic: 1000 }, apply: () => G.mult.click *= 5 }, { id: 'u_auto6', era: 6, name: 'Entropy Reversal', desc: 'Auto production ×2', cost: { organic: 5000 }, apply: () => G.mult.auto *= 2 }, { id: 'u_click8', era: 7, name: 'Geological Memory', desc: 'Click yield ×5', cost: { crystal: 500 }, apply: () => G.mult.click *= 5 }, { id: 'u_auto7', era: 7, name: 'Deep Time Compression', desc: 'Auto production ×3', cost: { crystal: 3000 }, apply: () => G.mult.auto *= 3 }, { id: 'u_click9', era: 8, name: 'Prebiotic Momentum', desc: 'Click yield ×8', cost: { amino: 500 }, apply: () => G.mult.click *= 8 }, { id: 'u_auto8', era: 8, name: 'RNA World Emergence', desc: 'Auto production ×3', cost: { amino: 3000 }, apply: () => G.mult.auto *= 3 }, { id: 'u_click10', era: 9, name: 'First Breath', desc: 'Click yield ×10', cost: { dna: 100 }, apply: () => G.mult.click *= 10 }, { id: 'u_auto9', era: 9, name: 'Natural Selection', desc: 'Auto production ×4', cost: { protein: 200 }, apply: () => G.mult.auto *= 4 },
 ];
 
 const RESEARCH = [
-  { id: 'r1', era: 0, name: 'Standard Model',       desc: 'Unlock neutron production',  cost: { quark: 500 },       apply: () => {} },
-  { id: 'r2', era: 1, name: 'QED Theory',            desc: 'Photons generate 3×',       cost: { photon: 100 },      apply: () => {} },
-  { id: 'r3', era: 2, name: 'Nucleon Binding',       desc: 'Nucleus synth 50% cheaper', cost: { electron: 200 },    apply: () => G.mult.synthCost *= 0.85 },
-  { id: 'r4', era: 3, name: 'Big Bang Nucleosynth.', desc: 'Unlock heavier atoms',      cost: { nucleus: 100 },     apply: () => {} },
-  { id: 'r5', era: 4, name: 'Spectroscopy',          desc: 'Identify atom properties',  cost: { hydrogen: 1000 },   apply: () => G.mult.auto *= 1.3 },
-  { id: 'r6', era: 5, name: 'Thermodynamics',        desc: 'Reaction efficiency +30%',  cost: { h2o: 3000 },        apply: () => G.mult.auto *= 1.3 },
-  { id: 'r7', era: 6, name: 'Polymer Chemistry',     desc: 'Long-chain molecules form faster', cost: { organic: 8000 }, apply: () => G.mult.auto *= 1.5 },
-  { id: 'r8', era: 7, name: 'Mineralogy',            desc: 'Crystal auto ×2',           cost: { crystal: 5000 },    apply: () => G.mult.auto *= 2 },
-  { id: 'r9', era: 8, name: 'Origin of Life Theory', desc: 'All prebiotics ×2',         cost: { amino: 5000 },      apply: () => G.mult.auto *= 2 },
-  { id: 'r10',era: 9, name: 'Central Dogma',         desc: 'DNA→RNA→Protein efficiency', cost: { dna: 500 },        apply: () => G.mult.auto *= 3 },
+  { id: 'r1', era: 0, name: 'Standard Model', desc: 'Unlock neutron production', cost: { quark: 500 }, apply: () => {} }, { id: 'r2', era: 1, name: 'QED Theory', desc: 'Photons generate 3×', cost: { photon: 100 }, apply: () => {} }, { id: 'r3', era: 2, name: 'Nucleon Binding', desc: 'Nucleus synth 50% cheaper', cost: { electron: 200 }, apply: () => G.mult.synthCost *= 0.85 }, { id: 'r4', era: 3, name: 'Big Bang Nucleosynth.', desc: 'Unlock heavier atoms', cost: { nucleus: 100 }, apply: () => {} }, { id: 'r5', era: 4, name: 'Spectroscopy', desc: 'Identify atom properties', cost: { hydrogen: 1000 }, apply: () => G.mult.auto *= 1.3 }, { id: 'r6', era: 5, name: 'Thermodynamics', desc: 'Reaction efficiency +30%', cost: { h2o: 3000 }, apply: () => G.mult.auto *= 1.3 }, { id: 'r7', era: 6, name: 'Polymer Chemistry', desc: 'Long chains form faster', cost: { organic: 8000 }, apply: () => G.mult.auto *= 1.5 }, { id: 'r8', era: 7, name: 'Mineralogy', desc: 'Crystal auto ×2', cost: { crystal: 5000 }, apply: () => G.mult.auto *= 2 }, { id: 'r9', era: 8, name: 'Origin of Life Theory', desc: 'All prebiotics ×2', cost: { amino: 5000 }, apply: () => G.mult.auto *= 2 }, { id: 'r10',era: 9, name: 'Central Dogma', desc: 'DNA→RNA efficiency', cost: { dna: 500 }, apply: () => G.mult.auto *= 3 },
 ];
 
-// WIN CONDITION
 const WIN_RESOURCE = 'cell_unit';
 const WIN_AMOUNT = 500;
 
-// ========================================
-// GAME STATE & SAVING
-// ========================================
-let G = {
-  era: 0,
-  res: {},
-  autoOwned: {},  // id → count
-  upgBought: {},
-  resBought: {},
-  mult: { click: 1, auto: 1, synthCost: 1 },
-  totalSynths: 0,
-  startTime: Date.now(),
-  tick: 0,
-  godmode: false
-};
-
-// Init resources
+// STATE
+let G = { era: 0, res: {}, autoOwned: {}, upgBought: {}, mult: { click: 1, auto: 1, synthCost: 1 }, totalSynths: 0, startTime: Date.now(), tick: 0, godmode: false, civMode: false };
 RESOURCES.forEach(r => { G.res[r.id] = 0; });
-G.res.calcium = 0; // bonus resource
+let isPaused = false;
 
-function saveGame() {
-  localStorage.setItem('matter_save', JSON.stringify(G));
-}
-
+function saveGame() { if(!G.civMode) localStorage.setItem('matter_save', JSON.stringify(G)); }
 function loadGame() {
   const saved = localStorage.getItem('matter_save');
   if (saved) {
     try {
-      const parsed = JSON.parse(saved);
-      Object.assign(G, parsed);
-      G.res = G.res || {};
-      G.autoOwned = G.autoOwned || {};
-      G.upgBought = G.upgBought || {};
-      G.mult = G.mult || { click: 1, auto: 1, synthCost: 1 };
-      G.godmode = !!G.godmode;
-      
-      // Update visual styles based on loaded era
+      const p = JSON.parse(saved); Object.assign(G, p);
+      G.res = G.res || {}; G.autoOwned = G.autoOwned || {}; G.upgBought = G.upgBought || {}; G.mult = G.mult || { click: 1, auto: 1, synthCost: 1 }; G.godmode = !!G.godmode; G.civMode = false;
       const era = ERAS[G.era];
       document.getElementById('core-nucleus').setAttribute('fill', era.color);
       document.getElementById('core-svg').style.filter = `drop-shadow(0 0 20px ${era.color})`;
-    } catch (e) {
-      console.error("Save file corrupted, starting fresh.");
-    }
+    } catch (e) {}
   }
 }
+function resetGame() { if (confirm("Are you sure you want to completely reset?")) { localStorage.removeItem('matter_save'); location.reload(); } }
 
-function resetGame() {
-  if (confirm("Are you sure you want to completely reset your progress?")) {
-    localStorage.removeItem('matter_save');
-    location.reload();
-  }
-}
-
-// Load game on start and setup auto-save interval
 loadGame();
-setInterval(saveGame, 5000); // Save every 5 seconds
+setInterval(saveGame, 5000);
 
 // ========================================
-// GODMODE / CHEATS
+// CHEATS & PROGRESSION
 // ========================================
 function enterCode() {
   const code = prompt("Enter secret code:");
   if (code === "godmode") {
     G.godmode = true;
-    // Infinite resources (excluding win condition so it doesn't instantly end)
-    for (const key in G.res) {
-      if(key !== WIN_RESOURCE) G.res[key] = 1e30;
-    }
-    // Show Era selector
+    for (const key in G.res) { if(key !== WIN_RESOURCE) G.res[key] = 1e30; }
     const sel = document.getElementById('era-select');
     sel.style.display = 'inline-block';
-    if (sel.options.length === 0) {
-      ERAS.forEach((e, i) => {
-        let opt = document.createElement('option');
-        opt.value = i; 
-        opt.text = e.name;
-        sel.appendChild(opt);
-      });
-    }
+    if (sel.options.length === 0) { ERAS.forEach((e, i) => { let opt = document.createElement('option'); opt.value = i; opt.text = e.name; sel.appendChild(opt); }); }
     sel.value = G.era;
     alert("Godmode activated! Infinite resources and stage selection unlocked.");
-    renderAll();
+    if(!G.civMode) renderAll();
   } else if (code === "end") {
-    G.res[WIN_RESOURCE] = WIN_AMOUNT; // Force Win
-    if (!winShown) showWin();
+    G.res[WIN_RESOURCE] = WIN_AMOUNT;
+    if (!winShown && !G.civMode) showWin();
+  } else if (code === "voyage") {
+    startCivGame();
+  } else if (code === "divine") {
+    if(G.civMode) triggerFinalCivEnding();
+    else alert("You must be in Voyage mode to use this code.");
   }
 }
 
@@ -1323,577 +677,436 @@ function jumpEra(eraIndex) {
 }
 
 // ========================================
-// HELPERS
+// CLICK / SYNTH / AUTO (BASE GAME)
 // ========================================
-function fmt(n) {
-  if (n === undefined || n === null) return '0';
-  if (n < 1000) return Math.floor(n).toString();
-  if (n >= 1e30) return '∞';
-  if (n < 1e6) return (n/1e3).toFixed(1) + 'K';
-  if (n < 1e9) return (n/1e6).toFixed(2) + 'M';
-  if (n < 1e12) return (n/1e9).toFixed(2) + 'B';
-  return (n/1e12).toFixed(2) + 'T';
-}
+function fmt(n) { if (n === undefined || n === null) return '0'; if (n < 1000) return Math.floor(n).toString(); if (n >= 1e30) return '∞'; if (n < 1e6) return (n/1e3).toFixed(1) + 'K'; if (n < 1e9) return (n/1e6).toFixed(2) + 'M'; if (n < 1e12) return (n/1e9).toFixed(2) + 'B'; return (n/1e12).toFixed(2) + 'T'; }
+function fmtRate(n) { return (!n || n < 0.001) ? '' : '+' + (n >= 1 ? fmt(n) : n.toFixed(2)) + '/s'; }
+function elapsed() { const s = Math.floor((Date.now() - G.startTime) / 1000); const m = Math.floor(s / 60); const h = Math.floor(m / 60); return h > 0 ? `${h}:${String(m%60).padStart(2,'0')}:${String(s%60).padStart(2,'0')}` : `${String(m).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`; }
 
-function fmtRate(n) {
-  if (!n || n < 0.001) return '';
-  return '+' + (n >= 1 ? fmt(n) : n.toFixed(2)) + '/s';
-}
-
-function elapsed() {
-  const s = Math.floor((Date.now() - G.startTime) / 1000);
-  const m = Math.floor(s / 60);
-  const h = Math.floor(m / 60);
-  if (h > 0) return `${h}:${String(m%60).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`;
-  return `${String(m).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`;
-}
-
-// ========================================
-// CLICK HANDLER
-// ========================================
 function handleClick(e) {
-  if(winShown) return;
-  const era = ERAS[G.era];
-  const amt = era.clickAmt();
-  G.res[era.clickResource] = (G.res[era.clickResource] || 0) + amt;
-  G.totalSynths += amt;
-
-  // floaty
-  const rect = document.getElementById('click-zone').getBoundingClientRect();
+  if(winShown || isPaused) return;
+  const era = ERAS[G.era]; const amt = era.clickAmt();
+  G.res[era.clickResource] = (G.res[era.clickResource] || 0) + amt; G.totalSynths += amt;
   floaty(e.clientX, e.clientY, `+${fmt(amt)} ${RESOURCES.find(r=>r.id===era.clickResource)?.name || era.clickResource}`, era.color);
-
-  // pulse the core
-  const core = document.getElementById('core-nucleus');
-  core.style.r = '14';
-  setTimeout(() => core.style.r = '8', 200);
-
-  checkEraAdvance();
-  renderAll();
+  const core = document.getElementById('core-nucleus'); core.style.r = '14'; setTimeout(() => core.style.r = '8', 200);
+  checkEraAdvance(); renderAll();
 }
 
-// ========================================
-// SYNTHESIS
-// ========================================
 function doSynth(recipe) {
-  // check resources
-  for (const [k, v] of Object.entries(recipe.recipe)) {
-    const needed = Math.ceil(v * G.mult.synthCost);
-    if ((G.res[k] || 0) < needed) return;
-  }
-  // deduct
-  for (const [k, v] of Object.entries(recipe.recipe)) {
-    G.res[k] -= Math.ceil(v * G.mult.synthCost);
-  }
-  // yield
-  for (const [k, v] of Object.entries(recipe.yield)) {
-    G.res[k] = (G.res[k] || 0) + v;
-    G.totalSynths += v;
-  }
-
-  floatyCenter(`✦ ${recipe.yieldStr}`, '#ffe135');
-  checkEraAdvance();
-  renderAll();
+  for (const [k, v] of Object.entries(recipe.recipe)) { if ((G.res[k] || 0) < Math.ceil(v * G.mult.synthCost)) return; }
+  for (const [k, v] of Object.entries(recipe.recipe)) { G.res[k] -= Math.ceil(v * G.mult.synthCost); }
+  for (const [k, v] of Object.entries(recipe.yield)) { G.res[k] = (G.res[k] || 0) + v; G.totalSynths += v; }
+  floatyCenter(`✦ ${recipe.yieldStr}`, '#ffe135'); checkEraAdvance(); renderAll();
 }
 
-// ========================================
-// AUTOMATORS
-// ========================================
 function buyAuto(autoId) {
-  const a = AUTOMATORS.find(x => x.id === autoId);
-  if (!a) return;
-  const count = G.autoOwned[autoId] || 0;
-  const mult = Math.pow(a.costMult, count);
-  // check cost
-  for (const [k, v] of Object.entries(a.baseCost)) {
-    if ((G.res[k] || 0) < v * mult) return;
-  }
-  // deduct
-  for (const [k, v] of Object.entries(a.baseCost)) {
-    G.res[k] -= v * mult;
-  }
-  G.autoOwned[autoId] = count + 1;
-  addLog(`Acquired: ${a.name} (×${count+1})`, 'milestone');
-  renderAll();
+  const a = AUTOMATORS.find(x => x.id === autoId); if (!a) return;
+  const count = G.autoOwned[autoId] || 0; const mult = Math.pow(a.costMult, count);
+  for (const [k, v] of Object.entries(a.baseCost)) { if ((G.res[k] || 0) < v * mult) return; }
+  for (const [k, v] of Object.entries(a.baseCost)) { G.res[k] -= v * mult; }
+  G.autoOwned[autoId] = count + 1; addLog(`Acquired: ${a.name} (×${count+1})`, 'milestone'); renderAll();
 }
+function getAutoCost(a) { const count = G.autoOwned[a.id] || 0; const mult = Math.pow(a.costMult, count); return Object.entries(a.baseCost).map(([k,v]) => `${fmt(v*mult)} ${k}`).join(' + '); }
+function computeAutoRate() { const rates = {}; AUTOMATORS.forEach(a => { const count = G.autoOwned[a.id] || 0; if (count === 0) return; for (const [k, v] of Object.entries(a.produces)) { rates[k] = (rates[k] || 0) + v * count * G.mult.auto; } }); return rates; }
 
-function getAutoCost(a) {
-  const count = G.autoOwned[a.id] || 0;
-  const mult = Math.pow(a.costMult, count);
-  const parts = Object.entries(a.baseCost).map(([k,v]) => `${fmt(v*mult)} ${k}`);
-  return parts.join(' + ');
-}
-
-function computeAutoRate() {
-  // returns per-second production map
-  const rates = {};
-  AUTOMATORS.forEach(a => {
-    const count = G.autoOwned[a.id] || 0;
-    if (count === 0) return;
-    for (const [k, v] of Object.entries(a.produces)) {
-      rates[k] = (rates[k] || 0) + v * count * G.mult.auto;
-    }
-  });
-  return rates;
-}
-
-// ========================================
-// UPGRADES / RESEARCH
-// ========================================
 function buyUpgrade(uid) {
-  const u = [...UPGRADES, ...RESEARCH].find(x => x.id === uid);
-  if (!u || G.upgBought[uid]) return;
-  for (const [k,v] of Object.entries(u.cost)) {
-    if ((G.res[k]||0) < v) return;
-  }
-  for (const [k,v] of Object.entries(u.cost)) {
-    G.res[k] -= v;
-  }
-  G.upgBought[uid] = true;
-  u.apply();
-  addLog(`Research: ${u.name}`, 'milestone');
-  renderAll();
+  const u = [...UPGRADES, ...RESEARCH].find(x => x.id === uid); if (!u || G.upgBought[uid]) return;
+  for (const [k,v] of Object.entries(u.cost)) { if ((G.res[k]||0) < v) return; }
+  for (const [k,v] of Object.entries(u.cost)) { G.res[k] -= v; }
+  G.upgBought[uid] = true; u.apply(); addLog(`Research: ${u.name}`, 'milestone'); renderAll();
 }
 
 // ========================================
-// ERA ADVANCE
+// ADVANCEMENT & CUTSCENES
 // ========================================
 function checkEraAdvance() {
-  if (G.era >= ERAS.length - 1) {
-    if ((G.res[WIN_RESOURCE] || 0) >= WIN_AMOUNT) {
-      showWin();
-    }
-    return;
-  }
-  
-  if (G.godmode) return; // Disable auto-advancement in Godmode so you don't get forced to the end
-  
+  if (G.era >= ERAS.length - 1) { if ((G.res[WIN_RESOURCE] || 0) >= WIN_AMOUNT) showWin(); return; }
+  if (G.godmode) return;
   const era = ERAS[G.era];
-  const primaryRes = G.res[era.clickResource] || 0;
-  if (primaryRes >= era.threshold) {
-    advanceEra();
-  }
+  if ((G.res[era.clickResource] || 0) >= era.threshold) triggerEraCutscene();
 }
 
-function advanceEra() {
-  G.era++;
-  const era = ERAS[G.era];
-
-  // show transition
+function triggerEraCutscene() {
+  isPaused = true;
+  G.era++; const era = ERAS[G.era];
   const overlay = document.getElementById('era-transition');
   document.getElementById('era-transition-text').textContent = era.name.toUpperCase();
-  document.getElementById('era-transition-sub').textContent = `Era ${G.era + 1} of ${ERAS.length} — Click to continue`;
-  overlay.classList.add('active');
+  document.getElementById('era-transition-sub').textContent = era.lore;
+  document.getElementById('era-transition-btn').style.display = 'block';
   overlay.style.borderColor = era.color;
-  overlay.onclick = () => overlay.classList.remove('active');
-
-  // Update core color
+  overlay.classList.add('active');
+  
   document.getElementById('core-nucleus').setAttribute('fill', era.color);
   document.getElementById('core-svg').style.filter = `drop-shadow(0 0 20px ${era.color})`;
-
   addLog(`◈ ERA ADVANCE → ${era.name}`, 'milestone');
-  addLog(`New click resource: ${RESOURCES.find(r=>r.id===era.clickResource)?.name}`, 'milestone');
+}
 
-  // Sync to display selector
-  const sel = document.getElementById('era-select');
-  if (sel.options.length > 0) sel.value = G.era;
-
+function closeEraTransition() {
+  document.getElementById('era-transition').classList.remove('active');
+  document.getElementById('era-transition-btn').style.display = 'none';
+  const sel = document.getElementById('era-select'); if (sel.options.length > 0) sel.value = G.era;
+  isPaused = false;
   renderAll();
 }
 
-// ========================================
-// GAME LOOP
-// ========================================
-let lastTick = Date.now();
-
 function gameTick() {
-  if (winShown) return; // Stop loop when game is over
-  
-  const now = Date.now();
-  const dt = (now - lastTick) / 1000;
-  lastTick = now;
-
+  if (winShown || isPaused || G.civMode) return;
+  const now = Date.now(); const dt = (now - lastTick) / 1000; lastTick = now;
   const rates = computeAutoRate();
-  for (const [k, v] of Object.entries(rates)) {
-    G.res[k] = (G.res[k] || 0) + v * dt;
-    G.totalSynths += v * dt;
-  }
-
+  for (const [k, v] of Object.entries(rates)) { G.res[k] = (G.res[k] || 0) + v * dt; G.totalSynths += v * dt; }
   checkEraAdvance();
-
-  G.tick++;
-  if (G.tick % 10 === 0) renderAll(); // render ~2x/sec
-
+  G.tick++; if (G.tick % 10 === 0) renderAll();
   if ((G.res[WIN_RESOURCE] || 0) >= WIN_AMOUNT) showWin();
 }
-
 setInterval(gameTick, 100);
 
-// ========================================
-// LOG
-// ========================================
 const logLines = [];
-function addLog(msg, type = 'neutral') {
-  logLines.unshift({ msg, type });
-  if (logLines.length > 40) logLines.pop();
-  const box = document.getElementById('log-scroll');
-  box.innerHTML = logLines.map(l => `<div class="log-line ${l.type}">[${elapsed()}] ${l.msg}</div>`).join('');
-}
+function addLog(msg, type = 'neutral') { logLines.unshift({ msg, type }); if (logLines.length > 40) logLines.pop(); document.getElementById('log-scroll').innerHTML = logLines.map(l => `<div class="log-line ${l.type}">[${elapsed()}] ${l.msg}</div>`).join(''); }
 
-// ========================================
-// FLOATIES
-// ========================================
-function floaty(x, y, text, color = '#00d4ff') {
-  const el = document.createElement('div');
-  el.className = 'floaty';
-  el.textContent = text;
-  el.style.color = color;
-  el.style.left = x + 'px';
-  el.style.top = (y - 10) + 'px';
-  document.body.appendChild(el);
-  setTimeout(() => el.remove(), 1200);
-}
+function floaty(x, y, text, color = '#00d4ff') { const el = document.createElement('div'); el.className = 'floaty'; el.textContent = text; el.style.color = color; el.style.left = x + 'px'; el.style.top = (y - 10) + 'px'; document.body.appendChild(el); setTimeout(() => el.remove(), 1200); }
+function floatyCenter(text, color) { const el = document.createElement('div'); el.className = 'floaty'; el.textContent = text; el.style.color = color || '#ffe135'; el.style.left = '50%'; el.style.top = '50%'; el.style.transform = 'translateX(-50%)'; document.body.appendChild(el); setTimeout(() => el.remove(), 1200); }
 
-function floatyCenter(text, color) {
-  const el = document.createElement('div');
-  el.className = 'floaty';
-  el.textContent = text;
-  el.style.color = color || '#ffe135';
-  el.style.left = '50%';
-  el.style.top = '50%';
-  el.style.transform = 'translateX(-50%)';
-  document.body.appendChild(el);
-  setTimeout(() => el.remove(), 1200);
-}
-
-// ========================================
-// TABS
-// ========================================
 let activeTab = 'synth';
-function setTab(t) {
-  activeTab = t;
-  document.querySelectorAll('.c-tab').forEach((b, i) => {
-    const tabs = ['synth','upgrades','research'];
-    b.classList.toggle('active', tabs[i] === t);
-  });
-  document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
-  document.getElementById('tab-' + t).classList.add('active');
-}
+function setTab(t) { activeTab = t; document.querySelectorAll('.c-tab').forEach((b, i) => { const tabs = ['synth','upgrades','research']; b.classList.toggle('active', tabs[i] === t); }); document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active')); document.getElementById('tab-' + t).classList.add('active'); }
 
-// ========================================
-// RENDER
-// ========================================
 function renderAll() {
-  renderResources();
-  renderSynth();
-  renderAutomators();
-  renderUpgrades();
-  renderHeader();
-  renderEraBar();
-  updateClickLabel();
-}
-
-function renderResources() {
-  const list = document.getElementById('res-list');
-  const visibleRes = RESOURCES.filter(r => r.era <= G.era);
-  const rates = computeAutoRate();
-
-  list.innerHTML = visibleRes.map(r => {
-    const val = G.res[r.id] || 0;
-    const rate = rates[r.id] || 0;
-    return `
-      <div class="res-row">
-        <div class="res-info">
-          <div class="res-dot" style="color:${r.color};background:${r.color}"></div>
-          <span class="res-name">${r.name}</span>
-        </div>
-        <div class="res-vals">
-          <span class="res-count">${fmt(val)}</span>
-          ${rate > 0 ? `<span class="res-rate">${fmtRate(rate)}</span>` : ''}
-        </div>
-      </div>`;
-  }).join('');
-}
-
-function renderSynth() {
-  const grid = document.getElementById('synthesis-grid');
-  const visible = SYNTH_RECIPES.filter(r => r.era <= G.era && !r.special);
-  grid.innerHTML = visible.map(r => {
-    const costParts = Object.entries(r.recipe).map(([k, v]) => {
-      const need = Math.ceil(v * G.mult.synthCost);
-      const have = G.res[k] || 0;
-      const ok = have >= need;
-      return `<span style="color:${ok?'var(--text3)':'var(--accent3)'}">${need} ${k}</span>`;
-    });
+  const visibleRes = RESOURCES.filter(r => r.era <= G.era); const rates = computeAutoRate();
+  document.getElementById('res-list').innerHTML = visibleRes.map(r => `<div class="res-row"><div class="res-info"><div class="res-dot" style="color:${r.color};background:${r.color}"></div><span class="res-name">${r.name}</span></div><div class="res-vals"><span class="res-count">${fmt(G.res[r.id]||0)}</span>${rates[r.id]>0?`<span class="res-rate">${fmtRate(rates[r.id])}</span>`:''}</div></div>`).join('');
+  
+  const vSynth = SYNTH_RECIPES.filter(r => r.era <= G.era && !r.special);
+  document.getElementById('synthesis-grid').innerHTML = vSynth.map(r => {
+    const costParts = Object.entries(r.recipe).map(([k, v]) => { const need = Math.ceil(v * G.mult.synthCost); const ok = (G.res[k]||0) >= need; return `<span style="color:${ok?'var(--text3)':'var(--accent3)'}">${need} ${k}</span>`; });
     const canDo = Object.entries(r.recipe).every(([k,v]) => (G.res[k]||0) >= Math.ceil(v*G.mult.synthCost));
-    return `
-      <button class="synth-btn" onclick="doSynth(SYNTH_RECIPES.find(x=>x.id==='${r.id}'))" ${canDo?'':'disabled'}>
-        <span class="sb-name">${r.name}</span>
-        <span class="sb-recipe">${costParts.join(' + ')}</span>
-        <span class="sb-yield">${r.yieldStr}</span>
-      </button>`;
+    return `<button class="synth-btn" onclick="doSynth(SYNTH_RECIPES.find(x=>x.id==='${r.id}'))" ${canDo?'':'disabled'}><span class="sb-name">${r.name}</span><span class="sb-recipe">${costParts.join(' + ')}</span><span class="sb-yield">${r.yieldStr}</span></button>`;
   }).join('');
-}
-
-function renderAutomators() {
-  const list = document.getElementById('automators-list');
-  const visible = AUTOMATORS.filter(a => a.era <= G.era);
-  const rates = computeAutoRate();
-
-  list.innerHTML = visible.map(a => {
-    const count = G.autoOwned[a.id] || 0;
-    const mult = Math.pow(a.costMult, count);
+  
+  const vAuto = AUTOMATORS.filter(a => a.era <= G.era);
+  document.getElementById('automators-list').innerHTML = vAuto.map(a => {
+    const count = G.autoOwned[a.id] || 0; const mult = Math.pow(a.costMult, count);
     const canBuy = Object.entries(a.baseCost).every(([k,v]) => (G.res[k]||0) >= v*mult);
     const rateStr = Object.entries(a.produces).map(([k,v]) => `${(v*G.mult.auto).toFixed(2)} ${k}/s`).join(', ');
-
-    return `
-      <div class="auto-card ${canBuy?'':''}${count>0?' owned':''}" onclick="buyAuto('${a.id}')">
-        <div class="ac-top">
-          <span class="ac-name">${a.name}</span>
-          ${count > 0 ? `<span class="ac-count">×${count}</span>` : ''}
-        </div>
-        <div class="ac-desc">${a.desc}</div>
-        <div class="ac-cost">Cost: ${getAutoCost(a)}</div>
-        <div class="ac-rate">▸ ${rateStr}</div>
-      </div>`;
-  }).join('');
-}
-
-function renderUpgrades() {
-  // upgrades tab
-  const upgList = document.getElementById('upgrades-list');
-  const vis = UPGRADES.filter(u => u.era <= G.era);
-  upgList.innerHTML = vis.map(u => {
-    const bought = !!G.upgBought[u.id];
-    const costStr = Object.entries(u.cost).map(([k,v])=>`${fmt(v)} ${k}`).join(' + ');
-    const canBuy = !bought && Object.entries(u.cost).every(([k,v])=>(G.res[k]||0)>=v);
-    return `
-      <button class="upg-btn ${bought?'bought':''}" onclick="buyUpgrade('${u.id}')" ${bought||!canBuy?'disabled':''}>
-        <div class="upg-info">
-          <span class="upg-name">${bought?'✓ ':' '}${u.name}</span>
-          <span class="upg-desc">${u.desc}</span>
-        </div>
-        <span class="upg-cost">${bought?'Owned':costStr}</span>
-      </button>`;
+    return `<div class="auto-card ${canBuy?'':''}${count>0?' owned':''}" onclick="buyAuto('${a.id}')"><div class="ac-top"><span class="ac-name">${a.name}</span>${count>0?`<span class="ac-count">×${count}</span>`:''}</div><div class="ac-desc">${a.desc}</div><div class="ac-cost">Cost: ${getAutoCost(a)}</div><div class="ac-rate">▸ ${rateStr}</div></div>`;
   }).join('');
 
-  // research tab
-  const resList = document.getElementById('research-list');
-  const visR = RESEARCH.filter(u => u.era <= G.era);
-  resList.innerHTML = visR.map(u => {
-    const bought = !!G.upgBought[u.id];
-    const costStr = Object.entries(u.cost).map(([k,v])=>`${fmt(v)} ${k}`).join(' + ');
-    const canBuy = !bought && Object.entries(u.cost).every(([k,v])=>(G.res[k]||0)>=v);
-    return `
-      <button class="upg-btn ${bought?'bought':''}" onclick="buyUpgrade('${u.id}')" ${bought||!canBuy?'disabled':''}>
-        <div class="upg-info">
-          <span class="upg-name">${bought?'✓ ':' '}${u.name}</span>
-          <span class="upg-desc">${u.desc}</span>
-        </div>
-        <span class="upg-cost">${bought?'Completed':costStr}</span>
-      </button>`;
-  }).join('');
-}
+  const vUpg = UPGRADES.filter(u => u.era <= G.era);
+  document.getElementById('upgrades-list').innerHTML = vUpg.map(u => { const bought = !!G.upgBought[u.id]; const costStr = Object.entries(u.cost).map(([k,v])=>`${fmt(v)} ${k}`).join(' + '); const canBuy = !bought && Object.entries(u.cost).every(([k,v])=>(G.res[k]||0)>=v); return `<button class="upg-btn ${bought?'bought':''}" onclick="buyUpgrade('${u.id}')" ${bought||!canBuy?'disabled':''}><div class="upg-info"><span class="upg-name">${bought?'✓ ':' '}${u.name}</span><span class="upg-desc">${u.desc}</span></div><span class="upg-cost">${bought?'Owned':costStr}</span></button>`; }).join('');
 
-function renderHeader() {
-  const rates = computeAutoRate();
-  const totalRate = Object.values(rates).reduce((a,b)=>a+b, 0);
-  document.getElementById('h-rate').textContent = fmtRate(totalRate) || '0/s';
-  document.getElementById('h-prestige').textContent = `Era ${G.era+1}/${ERAS.length}`;
-  document.getElementById('h-time').textContent = elapsed();
-  document.getElementById('era-name').textContent = ERAS[G.era].name;
-  document.getElementById('era-name').style.color = ERAS[G.era].color;
-}
+  const vRes = RESEARCH.filter(u => u.era <= G.era);
+  document.getElementById('research-list').innerHTML = vRes.map(u => { const bought = !!G.upgBought[u.id]; const costStr = Object.entries(u.cost).map(([k,v])=>`${fmt(v)} ${k}`).join(' + '); const canBuy = !bought && Object.entries(u.cost).every(([k,v])=>(G.res[k]||0)>=v); return `<button class="upg-btn ${bought?'bought':''}" onclick="buyUpgrade('${u.id}')" ${bought||!canBuy?'disabled':''}><div class="upg-info"><span class="upg-name">${bought?'✓ ':' '}${u.name}</span><span class="upg-desc">${u.desc}</span></div><span class="upg-cost">${bought?'Completed':costStr}</span></button>`; }).join('');
 
-function renderEraBar() {
-  const era = ERAS[G.era];
-  const target = era.clickResource;
-  const threshold = era.threshold;
-  const have = G.res[target] || 0;
-
-  let pct;
-  if (threshold === Infinity) {
-    pct = Math.min(100, (have / WIN_AMOUNT) * 100);
-    document.getElementById('era-prog-text').textContent = `${fmt(have)} / ${fmt(WIN_AMOUNT)} ${WIN_RESOURCE}`;
-    document.getElementById('era-title-bar').textContent = era.name.toUpperCase();
-  } else {
-    pct = Math.min(100, (have / threshold) * 100);
-    document.getElementById('era-prog-text').textContent = `${fmt(have)} / ${fmt(threshold)}`;
-    document.getElementById('era-title-bar').textContent = era.name.toUpperCase();
-  }
-
-  document.getElementById('era-fill').style.width = pct + '%';
-  document.getElementById('era-fill').style.background = `linear-gradient(90deg, ${era.color}88, ${era.color})`;
-}
-
-function updateClickLabel() {
-  const era = ERAS[G.era];
-  const res = RESOURCES.find(r => r.id === era.clickResource);
-  const amt = era.clickAmt();
-  document.getElementById('click-reward').textContent = `+${fmt(amt)} ${res?.name || era.clickResource} per click`;
-  document.getElementById('click-label').textContent = 'CLICK TO SYNTHESIZE';
+  const totalRate = Object.values(rates).reduce((a,b)=>a+b, 0); document.getElementById('h-rate').textContent = fmtRate(totalRate) || '0/s';
+  document.getElementById('h-prestige').textContent = `Era ${G.era+1}/${ERAS.length}`; document.getElementById('h-time').textContent = elapsed();
+  document.getElementById('era-name').textContent = ERAS[G.era].name; document.getElementById('era-name').style.color = ERAS[G.era].color;
+  
+  const era = ERAS[G.era]; const have = G.res[era.clickResource] || 0;
+  let pct = era.threshold === Infinity ? Math.min(100, (have / WIN_AMOUNT) * 100) : Math.min(100, (have / era.threshold) * 100);
+  document.getElementById('era-prog-text').textContent = era.threshold === Infinity ? `${fmt(have)} / ${fmt(WIN_AMOUNT)} ${WIN_RESOURCE}` : `${fmt(have)} / ${fmt(era.threshold)}`;
+  document.getElementById('era-title-bar').textContent = era.name.toUpperCase();
+  document.getElementById('era-fill').style.width = pct + '%'; document.getElementById('era-fill').style.background = `linear-gradient(90deg, ${era.color}88, ${era.color})`;
+  document.getElementById('click-reward').textContent = `+${fmt(era.clickAmt())} ${RESOURCES.find(r=>r.id===era.clickResource)?.name || era.clickResource} per click`;
 }
 
 // ========================================
-// WIN CINEMATIC & CREDITS
+// WIN CINEMATIC
 // ========================================
 let winShown = false;
-
 function showWin() {
-  if (winShown) return;
-  winShown = true;
-  
-  // Setup Cinematic
-  const cineScreen = document.getElementById('cinematic-screen');
-  const cineText = document.getElementById('cine-text');
-  const cineCanvas = document.getElementById('cine-canvas');
-  const cctx = cineCanvas.getContext('2d');
-  
-  cineScreen.classList.add('active');
-  cineCanvas.width = window.innerWidth;
-  cineCanvas.height = window.innerHeight;
+  if (winShown) return; winShown = true;
+  const cineScreen = document.getElementById('cinematic-screen'); const cineText = document.getElementById('cine-text'); const cineCanvas = document.getElementById('cine-canvas'); const cctx = cineCanvas.getContext('2d');
+  cineScreen.classList.add('active'); cineCanvas.width = window.innerWidth; cineCanvas.height = window.innerHeight;
 
   let cineParticles = [];
-  for(let i=0; i<250; i++) {
-     cineParticles.push({
-       x: Math.random() * cineCanvas.width,
-       y: Math.random() * cineCanvas.height,
-       vx: (Math.random()-0.5)*5,
-       vy: (Math.random()-0.5)*5,
-       color: Math.random() > 0.5 ? '#ff6b35' : '#ff3d71',
-       size: Math.random()*2 + 1,
-       angle: Math.random()*Math.PI*2,
-       dist: Math.random()*120 + 20
-     });
-  }
+  for(let i=0; i<250; i++) { cineParticles.push({ x: Math.random() * cineCanvas.width, y: Math.random() * cineCanvas.height, vx: (Math.random()-0.5)*5, vy: (Math.random()-0.5)*5, color: Math.random() > 0.5 ? '#ff6b35' : '#ff3d71', size: Math.random()*2 + 1, angle: Math.random()*Math.PI*2, dist: Math.random()*120 + 20 }); }
 
-  const cineStart = Date.now();
-  let cineReq;
-
+  const cineStart = Date.now(); let cineReq;
   function drawCine() {
-     let now = Date.now();
-     let t = (now - cineStart)/1000;
-     cctx.fillStyle = 'rgba(0,0,0,0.15)';
-     cctx.fillRect(0,0,cineCanvas.width,cineCanvas.height);
-     
-     let cx = cineCanvas.width/2;
-     let cy = cineCanvas.height/2;
-     
+     let t = (Date.now() - cineStart)/1000;
+     cctx.fillStyle = 'rgba(0,0,0,0.15)'; cctx.fillRect(0,0,cineCanvas.width,cineCanvas.height);
+     let cx = cineCanvas.width/2; let cy = cineCanvas.height/2;
      cineParticles.forEach((p, i) => {
-        if (t < 4.0) { 
-           // Phase 1: Quarks / Chaotic sparking
-           p.x += p.vx; p.y += p.vy;
-           if(p.x<0||p.x>cineCanvas.width) p.vx*=-1;
-           if(p.y<0||p.y>cineCanvas.height) p.vy*=-1;
-        } else if (t < 8.5) { 
-           // Phase 2: Atoms / Orbital groups
-           let clusterX = cx + (i%5 - 2)*180;
-           let clusterY = cy + (Math.floor(i/5)%3 - 1)*180;
-           p.angle += 0.05 + (i%3)*0.01;
-           let tx = clusterX + Math.cos(p.angle)*p.dist;
-           let ty = clusterY + Math.sin(p.angle)*p.dist;
-           p.x += (tx - p.x)*0.06;
-           p.y += (ty - p.y)*0.06;
-           p.color = i%2===0 ? '#7fff6b' : '#00d4ff';
-        } else if (t < 13.0) { 
-           // Phase 3: Life / DNA Helix
-           let row = i % 125;
-           let strand = i < 125 ? 1 : -1;
-           let yPos = cy - 350 + row*6;
-           let wave = Math.sin(row*0.1 + t*2) * 120 * strand;
-           let tx = cx + wave;
-           let ty = yPos;
-           p.x += (tx - p.x)*0.06;
-           p.y += (ty - p.y)*0.06;
-           p.color = i%3===0 ? '#ff006e' : '#ffffff';
-        } else { 
-           // Phase 4: Cosmos Explosion
-           p.vx = (p.x - cx)*0.015;
-           p.vy = (p.y - cy)*0.015;
-           p.x += p.vx; p.y += p.vy;
-           p.color = '#ffffff';
-        }
-        
-        cctx.beginPath();
-        cctx.arc(p.x, p.y, p.size, 0, Math.PI*2);
-        cctx.fillStyle = p.color;
-        cctx.fill();
+        if (t < 4.0) { p.x += p.vx; p.y += p.vy; if(p.x<0||p.x>cineCanvas.width) p.vx*=-1; if(p.y<0||p.y>cineCanvas.height) p.vy*=-1; } 
+        else if (t < 8.5) { let clusterX = cx + (i%5 - 2)*180; let clusterY = cy + (Math.floor(i/5)%3 - 1)*180; p.angle += 0.05 + (i%3)*0.01; let tx = clusterX + Math.cos(p.angle)*p.dist; let ty = clusterY + Math.sin(p.angle)*p.dist; p.x += (tx - p.x)*0.06; p.y += (ty - p.y)*0.06; p.color = i%2===0 ? '#7fff6b' : '#00d4ff'; } 
+        else if (t < 13.0) { let row = i % 125; let strand = i < 125 ? 1 : -1; let yPos = cy - 350 + row*6; let wave = Math.sin(row*0.1 + t*2) * 120 * strand; p.x += (cx + wave - p.x)*0.06; p.y += (yPos - p.y)*0.06; p.color = i%3===0 ? '#ff006e' : '#ffffff'; } 
+        else { p.vx = (p.x - cx)*0.015; p.vy = (p.y - cy)*0.015; p.x += p.vx; p.y += p.vy; p.color = '#ffffff'; }
+        cctx.beginPath(); cctx.arc(p.x, p.y, p.size, 0, Math.PI*2); cctx.fillStyle = p.color; cctx.fill();
      });
-     
-     if (t < 16) {
-        cineReq = requestAnimationFrame(drawCine);
-     } else {
-        cctx.clearRect(0,0,cineCanvas.width, cineCanvas.height);
-     }
+     if (t < 16) cineReq = requestAnimationFrame(drawCine); else cctx.clearRect(0,0,cineCanvas.width, cineCanvas.height);
   }
-
-  drawCine(); // Start animation loop
-
-  // Text Sequence
-  const phrases = [
-    "FROM QUARKS...",
-    "TO ATOMS...",
-    "TO LIFE...",
-    "THE COSMOS AWAKENS."
-  ];
-
-  let step = 0;
+  drawCine();
+  const phrases = ["FROM QUARKS...", "TO ATOMS...", "TO LIFE...", "THE COSMOS AWAKENS."]; let step = 0;
   function playCinematicText() {
-    if (step >= phrases.length) {
-      cineScreen.classList.remove('active');
-      playCredits();
-      return;
-    }
-    cineText.textContent = phrases[step];
-    
-    // Fade in
-    setTimeout(() => {
-      cineText.classList.add('visible');
-    }, 100);
-    
-    // Wait, then fade out
-    setTimeout(() => {
-      cineText.classList.remove('visible');
-      step++;
-      // Sync with the 4-ish second phases of the canvas animation
-      setTimeout(playCinematicText, 1500); 
-    }, 3000);
+    if (step >= phrases.length) { cineScreen.classList.remove('active'); showFinalWin(); return; }
+    cineText.textContent = phrases[step]; setTimeout(() => { cineText.classList.add('visible'); }, 100);
+    setTimeout(() => { cineText.classList.remove('visible'); step++; setTimeout(playCinematicText, 1500); }, 3000);
   }
-  
   playCinematicText();
 }
 
-function playCredits() {
-  const credScreen = document.getElementById('credits-screen');
-  const credContainer = document.getElementById('credits-container');
-  credScreen.classList.add('active');
-  credContainer.classList.add('scroll');
-
-  // Animation is 30s long. Wait an extra 4 seconds after (pure black) before showing win screen
-  setTimeout(() => {
-    credScreen.classList.remove('active');
-    setTimeout(showFinalWin, 4000); 
-  }, 30000); 
-}
-
 function showFinalWin() {
-  const t = Math.floor((Date.now() - G.startTime) / 1000);
-  const m = Math.floor(t/60), s = t%60;
-  document.getElementById('win-stats').innerHTML =
-    `You synthesized life from raw quarks.\n\nTime: ${m}m ${s}s\nTotal Synthesized: ${fmt(G.totalSynths)}\nEras Traversed: ${G.era + 1} / ${ERAS.length}\nProtocells Created: ${fmt(G.res[WIN_RESOURCE] || 0)}`;
+  const t = Math.floor((Date.now() - G.startTime) / 1000); const m = Math.floor(t/60), s = t%60;
+  document.getElementById('win-stats').innerHTML = `You synthesized life from raw quarks.\n\nTime: ${m}m ${s}s\nTotal Synthesized: ${fmt(G.totalSynths)}\nEras Traversed: ${G.era + 1} / ${ERAS.length}\nProtocells Created: ${fmt(G.res[WIN_RESOURCE] || 0)}`;
   document.getElementById('win-screen').classList.add('active');
 }
 
 // ========================================
-// INITIAL LOG
+// THE COSMIC VOYAGE (CIVILIZATION LITE)
 // ========================================
+const CIV_NAMES = ["Aethelgard", "Zarconis", "Vuldar", "Oceana", "Krynn", "Solari", "Terranova", "Umbria", "Aurelia", "Pyra", "Xenon", "Lumina"];
+let CivState = { active: false, year: 0, civs: [], spaceAge: false, galacticWar: false };
+let civLogLines = [];
+let civInterval;
+
+function startCivGame() {
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('win-screen').classList.remove('active');
+  document.getElementById('civ-app').classList.add('active');
+  G.civMode = true; CivState.active = true;
+  cLog("The era of raw matter has ended. The era of Civilizations begins.", "log-good");
+  civInterval = setInterval(civTick, 1000);
+  initCivCanvas();
+}
+
+function cLog(msg, cls="log-civ") {
+  civLogLines.unshift(`<div class="${cls}">[Year ${CivState.year}] ${msg}</div>`);
+  if(civLogLines.length > 50) civLogLines.pop();
+  document.getElementById('civ-log').innerHTML = civLogLines.join('');
+}
+
+function randomName() { return CIV_NAMES[Math.floor(Math.random() * CIV_NAMES.length)] + "-" + Math.floor(Math.random() * 999); }
+
+function civSpawn() {
+  const name = randomName();
+  CivState.civs.push({ name: name, pop: 1000, tech: 1, military: 10, isSpace: false, color: `hsl(${Math.random()*360}, 70%, 60%)` });
+  cLog(`A new civilization, ${name}, has emerged from the dust.`, "log-good");
+  renderCivs();
+}
+
+function civBless() {
+  if (CivState.civs.length === 0) return cLog("No civilizations to bless!", "log-bad");
+  let target = CivState.civs[Math.floor(Math.random()*CivState.civs.length)];
+  target.pop = Math.floor(target.pop * 1.5); target.tech += 5;
+  cLog(`Divine light shines upon ${target.name}. Population surges! Tech grows.`, "log-good");
+  triggerCivVisual('bless'); renderCivs();
+}
+
+function civDisaster() {
+  if (CivState.civs.length === 0) return cLog("The planet is empty. Only the wind howls.", "log-civ");
+  let target = CivState.civs[Math.floor(Math.random()*CivState.civs.length)];
+  target.pop = Math.floor(target.pop * 0.4); target.military = Math.floor(target.military * 0.5);
+  cLog(`A cataclysmic event strikes ${target.name}! Population decimated.`, "log-bad");
+  triggerCivVisual('disaster'); renderCivs();
+}
+
+function civForceWar() {
+  if (CivState.civs.length < 2) return cLog("Need at least two civilizations to spark a war.", "log-bad");
+  let c1 = CivState.civs[Math.floor(Math.random()*CivState.civs.length)];
+  let c2 = CivState.civs[Math.floor(Math.random()*CivState.civs.length)];
+  while(c1 === c2) c2 = CivState.civs[Math.floor(Math.random()*CivState.civs.length)];
+  
+  cLog(`Tensions boil! ${c1.name} declares war on ${c2.name}!`, "log-war");
+  if(c1.military > c2.military) {
+    c2.pop = Math.floor(c2.pop * 0.5); c1.military += 5; cLog(`${c1.name} wins a brutal victory over ${c2.name}.`, "log-war");
+  } else {
+    c1.pop = Math.floor(c1.pop * 0.5); c2.military += 5; cLog(`${c2.name} successfully repels ${c1.name}'s invasion.`, "log-war");
+  }
+  triggerCivVisual('war'); renderCivs();
+}
+
+function civSpaceProgram() {
+  let advanced = CivState.civs.filter(c => c.tech >= 20 && !c.isSpace);
+  if(advanced.length === 0) return cLog("No civilization is technologically advanced enough (Needs 20 Tech).", "log-bad");
+  let c = advanced[0];
+  c.isSpace = true; c.tech += 50; c.military += 100;
+  CivState.spaceAge = true;
+  cLog(`${c.name} has launched into the cosmos! A new Space Age begins.`, "log-space");
+  triggerCivVisual('space'); renderCivs();
+}
+
+function civTick() {
+  if(!CivState.active) return;
+  CivState.year += Math.floor(Math.random() * 5) + 1;
+  document.getElementById('civ-year').textContent = CivState.year;
+
+  CivState.civs.forEach(c => {
+    c.pop = Math.floor(c.pop * 1.05);
+    c.tech += Math.random() < 0.3 ? 1 : 0;
+    c.military += Math.floor(c.pop * 0.01);
+  });
+
+  // Random Events
+  if(CivState.civs.length > 0 && Math.random() < 0.1) {
+    let r = Math.random();
+    if(r < 0.3) civBless();
+    else if(r < 0.6) civDisaster();
+    else if(CivState.civs.length > 1) civForceWar();
+  }
+
+  // Galactic War Check
+  if(CivState.spaceAge && Math.random() < 0.05 && !CivState.galacticWar) {
+    CivState.galacticWar = true;
+    cLog("WARNING: Alien signatures detected. The Galactic War has begun!", "log-bad");
+    triggerCivVisual('alien');
+  }
+
+  if(CivState.galacticWar) {
+    let spaces = CivState.civs.filter(c => c.isSpace);
+    if(spaces.length > 0) {
+      let c = spaces[0];
+      if(c.military > 500) {
+        cLog(`${c.name}'s dreadnoughts crush the alien fleet! Dominance established.`, "log-good");
+        setTimeout(triggerFinalCivEnding, 3000);
+      } else {
+        c.military += 20; cLog(`${c.name} engages in desperate orbital combat.`, "log-war");
+        triggerCivVisual('spaceWar');
+      }
+    }
+  }
+  renderCivs();
+}
+
+function renderCivs() {
+  document.getElementById('civ-list-container').innerHTML = CivState.civs.map(c => `
+    <div class="civ-card" style="border-left-color:${c.color}">
+      <h3>${c.isSpace ? '🚀 ' : ''}${c.name}</h3>
+      <p><span>Pop:</span> <span>${fmt(c.pop)}</span></p>
+      <p><span>Tech:</span> <span>${Math.floor(c.tech)}</span></p>
+      <p><span>Military:</span> <span>${fmt(c.military)}</span></p>
+    </div>
+  `).join('');
+}
+
+// Civ Canvas Vis
+let civCV = document.getElementById('civ-canvas');
+let ctxC = civCV.getContext('2d');
+let civFx = [];
+
+function initCivCanvas() {
+  civCV.width = window.innerWidth; civCV.height = window.innerHeight;
+  window.addEventListener('resize', () => { civCV.width = window.innerWidth; civCV.height = window.innerHeight; });
+  requestAnimationFrame(drawCivVisuals);
+}
+
+function triggerCivVisual(type) {
+  let cx = civCV.width/2, cy = civCV.height/2;
+  if(type === 'war') {
+    for(let i=0; i<30; i++) civFx.push({ x: cx+(Math.random()-0.5)*200, y: cy+(Math.random()-0.5)*200, life: 1, type: 'boom' });
+  } else if (type === 'bless') {
+    for(let i=0; i<50; i++) civFx.push({ x: cx+(Math.random()-0.5)*300, y: cy+(Math.random()-0.5)*300, life: 1, type: 'sparkle' });
+  } else if (type === 'disaster') {
+    for(let i=0; i<10; i++) civFx.push({ x: cx+(Math.random()-0.5)*200, y: cy-300, vx:(Math.random()-0.5)*2, vy:Math.random()*5+5, life: 2, type: 'meteor' });
+  } else if (type === 'space') {
+    for(let i=0; i<5; i++) civFx.push({ x: cx+(Math.random()-0.5)*100, y: cy, vx: (Math.random()-0.5)*3, vy: -Math.random()*5-5, life: 3, type: 'rocket' });
+  } else if (type === 'spaceWar') {
+    for(let i=0; i<20; i++) civFx.push({ x: cx+(Math.random()-0.5)*500, y: cy+(Math.random()-0.5)*500, life: 0.5, type: 'laser' });
+  }
+}
+
+function drawCivVisuals() {
+  if(!CivState.active) return;
+  ctxC.clearRect(0,0,civCV.width, civCV.height);
+  let cx = civCV.width/2, cy = civCV.height/2;
+  
+  // Draw Planet
+  ctxC.beginPath(); ctxC.arc(cx, cy, 150, 0, Math.PI*2);
+  ctxC.fillStyle = '#0f172a'; ctxC.fill();
+  ctxC.lineWidth = 2; ctxC.strokeStyle = '#3b82f6'; ctxC.stroke();
+  
+  for(let i=civFx.length-1; i>=0; i--) {
+    let p = civFx[i]; p.life -= 0.02;
+    if(p.life <= 0) { civFx.splice(i, 1); continue; }
+    
+    if(p.type === 'boom') {
+      ctxC.beginPath(); ctxC.arc(p.x, p.y, (1-p.life)*30, 0, Math.PI*2);
+      ctxC.fillStyle = `rgba(239, 68, 68, ${p.life})`; ctxC.fill();
+    } else if (p.type === 'sparkle') {
+      ctxC.beginPath(); ctxC.arc(p.x, p.y, p.life*5, 0, Math.PI*2);
+      ctxC.fillStyle = `rgba(74, 222, 128, ${p.life})`; ctxC.fill();
+      p.y -= 1;
+    } else if (p.type === 'meteor') {
+      ctxC.beginPath(); ctxC.arc(p.x, p.y, 4, 0, Math.PI*2);
+      ctxC.fillStyle = '#f97316'; ctxC.fill();
+      ctxC.beginPath(); ctxC.moveTo(p.x, p.y); ctxC.lineTo(p.x-p.vx*10, p.y-p.vy*10);
+      ctxC.strokeStyle = 'rgba(249, 115, 22, 0.5)'; ctxC.lineWidth=2; ctxC.stroke();
+      p.x += p.vx; p.y += p.vy;
+    } else if (p.type === 'rocket') {
+      ctxC.beginPath(); ctxC.arc(p.x, p.y, 3, 0, Math.PI*2); ctxC.fillStyle = '#fff'; ctxC.fill();
+      ctxC.beginPath(); ctxC.moveTo(p.x, p.y); ctxC.lineTo(p.x, p.y+20); ctxC.strokeStyle='#a855f7'; ctxC.stroke();
+      p.x += p.vx; p.y += p.vy;
+    } else if (p.type === 'laser') {
+      ctxC.beginPath(); ctxC.moveTo(p.x, p.y); ctxC.lineTo(p.x+20, p.y+20);
+      ctxC.strokeStyle = `rgba(239, 68, 68, ${p.life})`; ctxC.lineWidth=3; ctxC.stroke();
+    }
+  }
+  requestAnimationFrame(drawCivVisuals);
+}
+
+// ========================================
+// THE FINAL CINEMATIC
+// ========================================
+function triggerFinalCivEnding() {
+  CivState.active = false; clearInterval(civInterval);
+  const cineScreen = document.getElementById('cinematic-screen');
+  const cctx = document.getElementById('cine-canvas').getContext('2d');
+  const cineCanvas = document.getElementById('cine-canvas');
+  cineScreen.classList.add('active');
+  
+  let t = 0;
+  function drawFinalEnding() {
+    t += 0.02;
+    cctx.fillStyle = 'rgba(0,0,0,0.1)'; cctx.fillRect(0,0,cineCanvas.width,cineCanvas.height);
+    let cx = cineCanvas.width/2, cy = cineCanvas.height/2;
+
+    if (t < 3) {
+      // Planet growing
+      cctx.beginPath(); cctx.arc(cx, cy, t*50, 0, Math.PI*2);
+      cctx.fillStyle = '#0f172a'; cctx.fill(); cctx.strokeStyle = '#3b82f6'; cctx.stroke();
+    } else if (t < 6) {
+      // Missiles / War
+      cctx.beginPath(); cctx.arc(cx, cy, 150, 0, Math.PI*2); cctx.fillStyle = '#0f172a'; cctx.fill();
+      for(let i=0; i<5; i++) {
+        let ang = Math.random()*Math.PI*2;
+        cctx.beginPath(); cctx.arc(cx+Math.cos(ang)*(Math.random()*150), cy+Math.sin(ang)*(Math.random()*150), Math.random()*20, 0, Math.PI*2);
+        cctx.fillStyle = 'rgba(239, 68, 68, 0.5)'; cctx.fill();
+      }
+    } else if (t < 9) {
+      // Space expansion
+      cctx.beginPath(); cctx.arc(cx, cy, 150, 0, Math.PI*2); cctx.fillStyle = '#0f172a'; cctx.fill();
+      for(let i=0; i<10; i++) {
+        let px = cx+(Math.random()-0.5)*800, py = cy+(Math.random()-0.5)*800;
+        cctx.beginPath(); cctx.arc(px, py, 2, 0, Math.PI*2); cctx.fillStyle = '#fff'; cctx.fill();
+        cctx.beginPath(); cctx.moveTo(px, py); cctx.lineTo(cx, cy); cctx.strokeStyle='rgba(168, 85, 247, 0.2)'; cctx.stroke();
+      }
+    } else if (t < 13) {
+      // Universe Conquest Flash
+      cctx.fillStyle = `rgba(255, 255, 255, ${Math.random()*0.5})`; cctx.fillRect(0,0,cineCanvas.width,cineCanvas.height);
+    } else {
+      cctx.clearRect(0,0,cineCanvas.width, cineCanvas.height);
+      cineScreen.classList.remove('active');
+      playCivCredits();
+      return;
+    }
+    requestAnimationFrame(drawFinalEnding);
+  }
+  drawFinalEnding();
+}
+
+function playCivCredits() {
+  const credScreen = document.getElementById('credits-screen');
+  const credContainer = document.getElementById('credits-container');
+  credScreen.classList.add('active'); credContainer.classList.add('scroll');
+  // Wait 30s for animation, plus 4s darkness before prompt
+  setTimeout(() => {
+    credScreen.classList.remove('active');
+    setTimeout(() => { if(confirm("The universe is yours. Reset reality?")) resetGame(); }, 4000);
+  }, 30000);
+}
+
+// Init
 if(G.tick === 0) {
   addLog('◈ The universe begins. Time = 0.', 'milestone');
   addLog('Click the particle to synthesize quarks.', 'neutral');
-  addLog('Combine quarks → protons → atoms → life.', 'neutral');
-} else {
-  addLog('◈ Universe restored from backup.', 'milestone');
-}
-renderAll();
+} else { addLog('◈ Universe restored.', 'milestone'); }
+if(!G.civMode) renderAll();
 </script>
 </body>
 </html>
