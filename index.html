@@ -119,6 +119,24 @@ html, body {
   gap: 20px;
 }
 
+.header-btn {
+  background: transparent;
+  border: 1px solid var(--accent);
+  color: var(--accent);
+  font-family: var(--font-display);
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  padding: 4px 8px;
+  cursor: pointer;
+  border-radius: 2px;
+  transition: all 0.2s;
+}
+
+.header-btn:hover {
+  background: rgba(0,212,255,0.1);
+  box-shadow: 0 0 10px rgba(0,212,255,0.3);
+}
+
 .header-stat {
   text-align: right;
 }
@@ -594,19 +612,64 @@ html, body {
   text-align: center;
 }
 
+/* === CINEMATIC & CREDITS SCREENS === */
+#cinematic-screen {
+  position: fixed; inset: 0; z-index: 700; background: #000;
+  display: none; 
+}
+#cinematic-screen.active { display: block; }
+#cine-canvas {
+  position: absolute; inset: 0; width: 100%; height: 100%; z-index: 701;
+}
+
+.cine-text {
+  position: absolute;
+  bottom: 10%;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 702;
+  font-family: var(--font-display); font-size: 36px; font-weight: 900; letter-spacing: 0.3em; 
+  color: var(--accent); text-shadow: 0 0 40px rgba(0,212,255,0.8);
+  opacity: 0; transition: opacity 1.5s ease-in-out; text-align: center; white-space: nowrap;
+}
+.cine-text.visible { opacity: 1; }
+
+#credits-screen {
+  position: fixed; inset: 0; z-index: 800; background: #000;
+  display: none; overflow: hidden;
+}
+#credits-screen.active { display: block; }
+.credits-container {
+  position: absolute; width: 100%; text-align: center;
+  transform: translateY(100vh);
+}
+.credits-container.scroll {
+  animation: creditScroll 30s linear forwards;
+}
+.credits-container h1 { font-family: var(--font-display); color: var(--accent); margin-bottom: 40px; font-size: 36px; letter-spacing: 0.3em; text-shadow: 0 0 20px rgba(0,212,255,0.5);}
+.credits-container p { font-family: var(--font-body); color: var(--text); font-size: 20px; margin-bottom: 10px; font-weight: 500;}
+.credits-container .role { color: var(--text2); font-size: 14px; margin-top: 45px; margin-bottom: 5px; letter-spacing: 0.2em; text-transform: uppercase; font-family: var(--font-display); }
+
+@keyframes creditScroll {
+  0% { transform: translateY(100vh); }
+  100% { transform: translateY(-150%); }
+}
+
 /* === WIN SCREEN === */
 #win-screen {
   position: fixed;
   inset: 0;
-  z-index: 600;
+  z-index: 900;
   display: none;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   background: radial-gradient(ellipse at center, #0a1628 0%, #000 100%);
+  opacity: 0;
+  transition: opacity 2s ease-in;
 }
 
-#win-screen.active { display: flex; }
+#win-screen.active { display: flex; opacity: 1; }
 
 .win-title {
   font-family: var(--font-display);
@@ -739,7 +802,11 @@ html, body {
       <div id="era-name" style="font-family:var(--font-display);font-size:12px;letter-spacing:0.15em;color:var(--accent)">The Quark Epoch</div>
     </div>
     <div id="header-right">
-      <div class="header-stat">
+      <select id="era-select" style="display:none; background: var(--deep); color: var(--accent); font-family: var(--font-display); font-size: 10px; border: 1px solid var(--border); padding: 4px; border-radius: 2px; cursor: pointer;" onchange="jumpEra(this.value)">
+      </select>
+      <button class="header-btn" onclick="enterCode()">CODE</button>
+      <button class="header-btn" onclick="resetGame()">RESET</button>
+      <div class="header-stat" style="margin-left: 10px;">
         <span class="hs-label">Total Synth/s</span>
         <span class="hs-val" id="h-rate">0.00</span>
       </div>
@@ -840,11 +907,72 @@ html, body {
   <div id="era-transition-sub"></div>
 </div>
 
-<!-- WIN SCREEN -->
+<!-- CINEMATIC OVERLAY -->
+<div id="cinematic-screen">
+  <canvas id="cine-canvas"></canvas>
+  <div id="cine-text" class="cine-text"></div>
+</div>
+
+<!-- CREDITS OVERLAY -->
+<div id="credits-screen">
+  <div id="credits-container" class="credits-container">
+    <h1>MATTER</h1>
+    
+    <div class="role">Producer</div>
+    <p>Zane</p>
+    
+    <div class="role">Developer</div>
+    <p>Zane</p>
+    
+    <div class="role">Idea</div>
+    <p>Zane</p>
+    
+    <div class="role">Coder</div>
+    <p>Claude Opus 4.6, Gemini 3.1 Pro</p>
+    
+    <div class="role">Front End Developer</div>
+    <p>Claude, Gemini</p>
+    
+    <div class="role">Carrier</div>
+    <p>Claude</p>
+
+    <div class="role">W Assist</div>
+    <p>Gemini</p>
+
+    <div class="role">Most Patience</div>
+    <p>Gemini</p>
+
+    <div class="role">Syntax Error Architect</div>
+    <p>Zane</p>
+
+    <div class="role">Stack Overflow Copypaster</div>
+    <p>Claude</p>
+
+    <div class="role">Hallucination Manager</div>
+    <p>Gemini</p>
+
+    <div class="role">Chief Prompt Engineer</div>
+    <p>Zane</p>
+
+    <div class="role">Bug Generator</div>
+    <p>Zane</p>
+
+    <div class="role">Unpaid Debugger</div>
+    <p>Claude</p>
+
+    <div class="role">The GOAT</div>
+    <p>Claude</p>
+
+    <div class="role">Strongest Vibe Coder of Today</div>
+    <p>Zane</p>
+  </div>
+</div>
+
+<!-- FINAL WIN SCREEN -->
 <div id="win-screen">
   <div class="win-title">THE COSMOS AWAKENS</div>
   <div class="win-sub" id="win-stats"></div>
-  <button class="win-btn" onclick="location.reload()">↺ BEGIN AGAIN</button>
+  <button class="win-btn" onclick="resetGame()">↺ BEGIN AGAIN</button>
 </div>
 
 <script>
@@ -1098,9 +1226,9 @@ const WIN_RESOURCE = 'cell_unit';
 const WIN_AMOUNT = 500;
 
 // ========================================
-// GAME STATE
+// GAME STATE & SAVING
 // ========================================
-const G = {
+let G = {
   era: 0,
   res: {},
   autoOwned: {},  // id → count
@@ -1110,12 +1238,89 @@ const G = {
   totalSynths: 0,
   startTime: Date.now(),
   tick: 0,
-  eraProgress: 0, // cumulative resource gained in current era trigger resource
+  godmode: false
 };
 
 // Init resources
 RESOURCES.forEach(r => { G.res[r.id] = 0; });
 G.res.calcium = 0; // bonus resource
+
+function saveGame() {
+  localStorage.setItem('matter_save', JSON.stringify(G));
+}
+
+function loadGame() {
+  const saved = localStorage.getItem('matter_save');
+  if (saved) {
+    try {
+      const parsed = JSON.parse(saved);
+      Object.assign(G, parsed);
+      G.res = G.res || {};
+      G.autoOwned = G.autoOwned || {};
+      G.upgBought = G.upgBought || {};
+      G.mult = G.mult || { click: 1, auto: 1, synthCost: 1 };
+      G.godmode = !!G.godmode;
+      
+      // Update visual styles based on loaded era
+      const era = ERAS[G.era];
+      document.getElementById('core-nucleus').setAttribute('fill', era.color);
+      document.getElementById('core-svg').style.filter = `drop-shadow(0 0 20px ${era.color})`;
+    } catch (e) {
+      console.error("Save file corrupted, starting fresh.");
+    }
+  }
+}
+
+function resetGame() {
+  if (confirm("Are you sure you want to completely reset your progress?")) {
+    localStorage.removeItem('matter_save');
+    location.reload();
+  }
+}
+
+// Load game on start and setup auto-save interval
+loadGame();
+setInterval(saveGame, 5000); // Save every 5 seconds
+
+// ========================================
+// GODMODE / CHEATS
+// ========================================
+function enterCode() {
+  const code = prompt("Enter secret code:");
+  if (code === "godmode") {
+    G.godmode = true;
+    // Infinite resources (excluding win condition so it doesn't instantly end)
+    for (const key in G.res) {
+      if(key !== WIN_RESOURCE) G.res[key] = 1e30;
+    }
+    // Show Era selector
+    const sel = document.getElementById('era-select');
+    sel.style.display = 'inline-block';
+    if (sel.options.length === 0) {
+      ERAS.forEach((e, i) => {
+        let opt = document.createElement('option');
+        opt.value = i; 
+        opt.text = e.name;
+        sel.appendChild(opt);
+      });
+    }
+    sel.value = G.era;
+    alert("Godmode activated! Infinite resources and stage selection unlocked.");
+    renderAll();
+  } else if (code === "end") {
+    G.res[WIN_RESOURCE] = WIN_AMOUNT; // Force Win
+    if (!winShown) showWin();
+  }
+}
+
+function jumpEra(eraIndex) {
+  G.era = parseInt(eraIndex);
+  const era = ERAS[G.era];
+  document.getElementById('core-nucleus').setAttribute('fill', era.color);
+  document.getElementById('core-svg').style.filter = `drop-shadow(0 0 20px ${era.color})`;
+  addLog(`◈ JUMPED TO ERA → ${era.name}`, 'milestone');
+  renderAll();
+}
 
 // ========================================
 // HELPERS
@@ -1123,6 +1328,7 @@ G.res.calcium = 0; // bonus resource
 function fmt(n) {
   if (n === undefined || n === null) return '0';
   if (n < 1000) return Math.floor(n).toString();
+  if (n >= 1e30) return '∞';
   if (n < 1e6) return (n/1e3).toFixed(1) + 'K';
   if (n < 1e9) return (n/1e6).toFixed(2) + 'M';
   if (n < 1e12) return (n/1e9).toFixed(2) + 'B';
@@ -1146,11 +1352,11 @@ function elapsed() {
 // CLICK HANDLER
 // ========================================
 function handleClick(e) {
+  if(winShown) return;
   const era = ERAS[G.era];
   const amt = era.clickAmt();
   G.res[era.clickResource] = (G.res[era.clickResource] || 0) + amt;
   G.totalSynths += amt;
-  trackEraProgress(era.clickResource, amt);
 
   // floaty
   const rect = document.getElementById('click-zone').getBoundingClientRect();
@@ -1163,13 +1369,6 @@ function handleClick(e) {
 
   checkEraAdvance();
   renderAll();
-}
-
-function trackEraProgress(resId, amt) {
-  const era = ERAS[G.era];
-  if (resId === era.clickResource) {
-    G.eraProgress += amt;
-  }
 }
 
 // ========================================
@@ -1189,7 +1388,6 @@ function doSynth(recipe) {
   for (const [k, v] of Object.entries(recipe.yield)) {
     G.res[k] = (G.res[k] || 0) + v;
     G.totalSynths += v;
-    trackEraProgress(k, v);
   }
 
   floatyCenter(`✦ ${recipe.yieldStr}`, '#ffe135');
@@ -1261,24 +1459,23 @@ function buyUpgrade(uid) {
 // ========================================
 function checkEraAdvance() {
   if (G.era >= ERAS.length - 1) {
-    // check win
     if ((G.res[WIN_RESOURCE] || 0) >= WIN_AMOUNT) {
       showWin();
     }
     return;
   }
-  const nextEra = ERAS[G.era + 1];
-  // check if primary resource threshold met
+  
+  if (G.godmode) return; // Disable auto-advancement in Godmode so you don't get forced to the end
+  
   const era = ERAS[G.era];
   const primaryRes = G.res[era.clickResource] || 0;
-  if (primaryRes >= era.threshold || G.eraProgress >= era.threshold) {
+  if (primaryRes >= era.threshold) {
     advanceEra();
   }
 }
 
 function advanceEra() {
   G.era++;
-  G.eraProgress = 0;
   const era = ERAS[G.era];
 
   // show transition
@@ -1296,6 +1493,10 @@ function advanceEra() {
   addLog(`◈ ERA ADVANCE → ${era.name}`, 'milestone');
   addLog(`New click resource: ${RESOURCES.find(r=>r.id===era.clickResource)?.name}`, 'milestone');
 
+  // Sync to display selector
+  const sel = document.getElementById('era-select');
+  if (sel.options.length > 0) sel.value = G.era;
+
   renderAll();
 }
 
@@ -1305,6 +1506,8 @@ function advanceEra() {
 let lastTick = Date.now();
 
 function gameTick() {
+  if (winShown) return; // Stop loop when game is over
+  
   const now = Date.now();
   const dt = (now - lastTick) / 1000;
   lastTick = now;
@@ -1312,7 +1515,6 @@ function gameTick() {
   const rates = computeAutoRate();
   for (const [k, v] of Object.entries(rates)) {
     G.res[k] = (G.res[k] || 0) + v * dt;
-    trackEraProgress(k, v * dt);
     G.totalSynths += v * dt;
   }
 
@@ -1321,7 +1523,6 @@ function gameTick() {
   G.tick++;
   if (G.tick % 10 === 0) renderAll(); // render ~2x/sec
 
-  // win
   if ((G.res[WIN_RESOURCE] || 0) >= WIN_AMOUNT) showWin();
 }
 
@@ -1533,12 +1734,148 @@ function updateClickLabel() {
 }
 
 // ========================================
-// WIN
+// WIN CINEMATIC & CREDITS
 // ========================================
 let winShown = false;
+
 function showWin() {
   if (winShown) return;
   winShown = true;
+  
+  // Setup Cinematic
+  const cineScreen = document.getElementById('cinematic-screen');
+  const cineText = document.getElementById('cine-text');
+  const cineCanvas = document.getElementById('cine-canvas');
+  const cctx = cineCanvas.getContext('2d');
+  
+  cineScreen.classList.add('active');
+  cineCanvas.width = window.innerWidth;
+  cineCanvas.height = window.innerHeight;
+
+  let cineParticles = [];
+  for(let i=0; i<250; i++) {
+     cineParticles.push({
+       x: Math.random() * cineCanvas.width,
+       y: Math.random() * cineCanvas.height,
+       vx: (Math.random()-0.5)*5,
+       vy: (Math.random()-0.5)*5,
+       color: Math.random() > 0.5 ? '#ff6b35' : '#ff3d71',
+       size: Math.random()*2 + 1,
+       angle: Math.random()*Math.PI*2,
+       dist: Math.random()*120 + 20
+     });
+  }
+
+  const cineStart = Date.now();
+  let cineReq;
+
+  function drawCine() {
+     let now = Date.now();
+     let t = (now - cineStart)/1000;
+     cctx.fillStyle = 'rgba(0,0,0,0.15)';
+     cctx.fillRect(0,0,cineCanvas.width,cineCanvas.height);
+     
+     let cx = cineCanvas.width/2;
+     let cy = cineCanvas.height/2;
+     
+     cineParticles.forEach((p, i) => {
+        if (t < 4.0) { 
+           // Phase 1: Quarks / Chaotic sparking
+           p.x += p.vx; p.y += p.vy;
+           if(p.x<0||p.x>cineCanvas.width) p.vx*=-1;
+           if(p.y<0||p.y>cineCanvas.height) p.vy*=-1;
+        } else if (t < 8.5) { 
+           // Phase 2: Atoms / Orbital groups
+           let clusterX = cx + (i%5 - 2)*180;
+           let clusterY = cy + (Math.floor(i/5)%3 - 1)*180;
+           p.angle += 0.05 + (i%3)*0.01;
+           let tx = clusterX + Math.cos(p.angle)*p.dist;
+           let ty = clusterY + Math.sin(p.angle)*p.dist;
+           p.x += (tx - p.x)*0.06;
+           p.y += (ty - p.y)*0.06;
+           p.color = i%2===0 ? '#7fff6b' : '#00d4ff';
+        } else if (t < 13.0) { 
+           // Phase 3: Life / DNA Helix
+           let row = i % 125;
+           let strand = i < 125 ? 1 : -1;
+           let yPos = cy - 350 + row*6;
+           let wave = Math.sin(row*0.1 + t*2) * 120 * strand;
+           let tx = cx + wave;
+           let ty = yPos;
+           p.x += (tx - p.x)*0.06;
+           p.y += (ty - p.y)*0.06;
+           p.color = i%3===0 ? '#ff006e' : '#ffffff';
+        } else { 
+           // Phase 4: Cosmos Explosion
+           p.vx = (p.x - cx)*0.015;
+           p.vy = (p.y - cy)*0.015;
+           p.x += p.vx; p.y += p.vy;
+           p.color = '#ffffff';
+        }
+        
+        cctx.beginPath();
+        cctx.arc(p.x, p.y, p.size, 0, Math.PI*2);
+        cctx.fillStyle = p.color;
+        cctx.fill();
+     });
+     
+     if (t < 16) {
+        cineReq = requestAnimationFrame(drawCine);
+     } else {
+        cctx.clearRect(0,0,cineCanvas.width, cineCanvas.height);
+     }
+  }
+
+  drawCine(); // Start animation loop
+
+  // Text Sequence
+  const phrases = [
+    "FROM QUARKS...",
+    "TO ATOMS...",
+    "TO LIFE...",
+    "THE COSMOS AWAKENS."
+  ];
+
+  let step = 0;
+  function playCinematicText() {
+    if (step >= phrases.length) {
+      cineScreen.classList.remove('active');
+      playCredits();
+      return;
+    }
+    cineText.textContent = phrases[step];
+    
+    // Fade in
+    setTimeout(() => {
+      cineText.classList.add('visible');
+    }, 100);
+    
+    // Wait, then fade out
+    setTimeout(() => {
+      cineText.classList.remove('visible');
+      step++;
+      // Sync with the 4-ish second phases of the canvas animation
+      setTimeout(playCinematicText, 1500); 
+    }, 3000);
+  }
+  
+  playCinematicText();
+}
+
+function playCredits() {
+  const credScreen = document.getElementById('credits-screen');
+  const credContainer = document.getElementById('credits-container');
+  credScreen.classList.add('active');
+  credContainer.classList.add('scroll');
+
+  // Animation is 30s long. Wait an extra 4 seconds after (pure black) before showing win screen
+  setTimeout(() => {
+    credScreen.classList.remove('active');
+    setTimeout(showFinalWin, 4000); 
+  }, 30000); 
+}
+
+function showFinalWin() {
   const t = Math.floor((Date.now() - G.startTime) / 1000);
   const m = Math.floor(t/60), s = t%60;
   document.getElementById('win-stats').innerHTML =
@@ -1549,9 +1886,13 @@ function showWin() {
 // ========================================
 // INITIAL LOG
 // ========================================
-addLog('◈ The universe begins. Time = 0.', 'milestone');
-addLog('Click the particle to synthesize quarks.', 'neutral');
-addLog('Combine quarks → protons → atoms → life.', 'neutral');
+if(G.tick === 0) {
+  addLog('◈ The universe begins. Time = 0.', 'milestone');
+  addLog('Click the particle to synthesize quarks.', 'neutral');
+  addLog('Combine quarks → protons → atoms → life.', 'neutral');
+} else {
+  addLog('◈ Universe restored from backup.', 'milestone');
+}
 renderAll();
 </script>
 </body>
